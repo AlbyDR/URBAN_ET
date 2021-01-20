@@ -1,0 +1,16 @@
+0,lite
+0,calc_fluor
+0,calc_planck
+0,calc_xanthophyllabs
+0,soilspectrum
+0,Fluorescence_model
+0,applTcorr
+0,verify
+1,saveCSV
+0,mSCOPE
+1,simulation
+0,calc_directional
+0,calc_vert_profiles
+1,soil_heat_method
+0,calc_rss_rbs
+1,calc_ebal

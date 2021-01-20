@@ -5,7 +5,7 @@ This page aims to share R codes and the Matlab code for Soil-Canopy-Observation 
 
 The codes are divided into:
 
-1- Data colletion and preprocessing (R)
+1- Data collection and preprocessing (R)
    1.1 DWD Data
    1.2 ICOS EC/CO2 data
    1.3 EC Data cleaning

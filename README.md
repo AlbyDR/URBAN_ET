@@ -3,7 +3,8 @@ Modelling of evapotranspiration in urban environments
 
 This page aims to share R codes and the Matlab code for Soil-Canopy-Observation of Photosynthesis and Energy fluxes (SCOPE) adapted to the Berlin case study.
 
-The codes are into:
+The codes are divided into:
+
 1- Data colletion and preprocessing (R)
    1.1 DWD Data
    1.2 ICOS EC/CO2 data

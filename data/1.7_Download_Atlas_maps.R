@@ -4,9 +4,6 @@ library(sf)
 library(dplyr)
 library(fasterize)
 library(ggplot2)
-#library(rasterVis)
-#library(geobuffer)
-
 ###################################################################
 ############ functions to import maps from the atlas ##############
 ###################################################################
@@ -49,6 +46,14 @@ sf_save <- function(z, fname) {
   
 }
 
+##########################################################################
+# funtion to resample
+resample_to_footprint = function(r, footprint_rast) {
+  r_new = raster::crop(x=r, y=extent(footprint_rast))  # first crop 
+  r_new = raster::resample(r_new, footprint_rast) # reproject
+  return(r_new)
+}
+###########################################################################
 #########################################################################
 #########################################################################
 #########################################################################
@@ -217,7 +222,6 @@ Atlas_r_Imprevious <- crop(Atlas_r_Imprevious,
 
 plot(Atlas_r_Imprevious[[1:2]], col=terrain.colors(10))
 
-
 #green volume - streets
 ####################################################################
 ####################################################################
@@ -226,7 +230,6 @@ plot(Atlas_r_Imprevious[[1:2]], col=terrain.colors(10))
 ###################################################################
 # 05.09 Green Volume (Edition 2017)
 ###################################################################
-#
 ####################################################################
 #green volume - blocks
 Green.blocks <- sf_fisbroker("https://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_05_09_gruenvol2010")
@@ -257,7 +260,6 @@ str(filter(Green.blocks, FLALLE==160724.4))
 #$ VEGVOLAUBE: int 446854  = Green volume of the undeveloped area [m³]
 #$ VEGVOLUBEB: num 5.09    = Number of green volumes related to the area of the undeveloped area covered with vegetation [m³ / m²]
 ################################################################
-
 Green.blocks <- st_transform(Green.blocks,crs(ETmap))
 
 ### green street
@@ -269,7 +271,6 @@ Green.Street <- Green.Street %>%
   dplyr::arrange(RAUMID)
 
 dplyr::glimpse(Green.Street)
-
 sf_save(Green.Street, "Green.Street_atlas")
 
 summary(Green.Street)
@@ -314,20 +315,6 @@ plot(Atlas_r_GreenVolume[[1]])
 # Spatial reference block / partial block map ISU 5 
 # (Information System City and Environment) as of 2015.
 ####################################################################
-#Soil1 <- sf_fisbroker("https://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_boden_wfs1_2015")
-#Soil1 <- Soil1 %>%
-#  dplyr::mutate(RAUMID = stringr::str_sub(gml_id, 12, 19)) %>%
-#  dplyr::select(gml_id, RAUMID, everything()) %>%
-#  dplyr::arrange(RAUMID)
-
-#dplyr::glimpse(Soil1)
-
-#sf_save(Soil2, "Soil1_atlas")
-
-#summary(Soil1)
-#str(filter(Soil1, SCHL5==0700231951000000))
-
-# Soil science characteristics 2015 (Environmental Atlas)
 Soil2 <- sf_fisbroker("https://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_boden_wfs2_2015")
 
 Soil2 <- Soil2 %>%
@@ -465,17 +452,6 @@ plot(Atlas_r_Soil[[1]])
 #https://fbinter.stadt-berlin.de/fb/feed/senstadt/a_06_10gebveghoeh2010_geb1
 #############################################################
 
-
-# prepareation of the layers to be extracted
-######################################################################
-##########################################################################
-# funtion 3
-resample_to_footprint = function(r, footprint_rast) {
-  r_new = raster::crop(x=r, y=extent(footprint_rast))  # first crop 
-  r_new = raster::resample(r_new, footprint_rast) # reproject
-  return(r_new)
-}
-###########################################################################
 ######################################################################
 ### vegetation height raster
 ######################################################################
@@ -510,10 +486,12 @@ water <- resample_to_footprint(r=water.r,footprint_rast=Atlas_r_ETmap)
                                   
 plot(water)
 
+# calculate veg. cover from veg.height
 veg.cover_vh_old_r <- Veg_height_old_r
 veg.cover_vh_old_r[] <- ifelse(Veg_height_old_r[] > 0.01, 1, 0)
 plot(Veg_height_old_r)
 
+#stack old files
 Old_maps <- raster::stack(Veg_height_old_r,
                           impervious_old_r,
                           building.height_r,
@@ -522,6 +500,7 @@ Old_maps <- raster::stack(Veg_height_old_r,
 
 plot(Old_maps[[1]])
 
+#stack all the stacks
 atlas_r_maps <- raster::stack(Old_maps,
                               Atlas_r_Imprevious,
                               Atlas_r_GreenVolume,Atlas_r_Soil,

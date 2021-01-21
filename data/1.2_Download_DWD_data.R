@@ -6,8 +6,6 @@
 library(readr)        # read file
 library(dplyr)        # filter and left_join
 library(lubridate)    # date operations
-library(ggplot2)      # plots
-library(kwb.datetime) # timezone convertion
 ###########################################################################################
 ### download the DWD data
 ### hourly data is devided in historical and recent data (need to adjust before merge)
@@ -529,6 +527,19 @@ colnames(dew_point) <- c("id", "timestamp", "QN_8" , "dewpoint.temp",
 #DWD_ROTH <- left_join(DWD_ROTH, soil.temp[,c(2,4,5,6,7,8,9)], by="timestamp", type="left", match="first")
 #############################################################################
 
+#library(MeTo) # atmospheric vapor pressure
+### actual (atmospheric) vapour pressure - ea (hPa) 
+########################################################################
+# Calculated (VP function MeTo) - kPa 
+#DWD_ROTH$ea <- VP(Tmea=DWD_ROTH$Ta, 
+#                   Rhmean =DWD_ROTH$RH, 
+#                   P=DWD_ROTH$p,
+#                   interval = "hour")*10 # *10 to convert kPa to hPa
+
+#Saturate vapor pressure and vapor pressure deficit - calculated [hPa]
+#DWD_ROTH$SVP <- satVP(Tmean=DWD_ROTH$Ta, interval='hour')*10
+#DWD_ROTH$VPD <- DWD_ROTH$SVP*(1-DWD_ROTH$RH/100)
+###################################################################
 
 ################################################################
 ##################### Metadata #################################

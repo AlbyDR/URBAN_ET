@@ -5,6 +5,7 @@ library(dplyr)      # filter
 library(MeTo)       # satVP
 library(bigleaf)    # LE.to.ET
 library(zoo)        # na.aprox
+library(ggplot2)    # plot
 ############################################################################
 # get a database to copy the structure
 ############################################################################
@@ -79,11 +80,35 @@ EC_ROTH$v_var.filled <- FilledLE_Roth$v_var_f
 summary(EC_ROTH)
 
 # convert LE to ET
-ET_ROTH.Filled <- na.approx(LE.to.ET(filter(EC_ROTH,year(timestamp)==2019)$LE.filled,
-                                     filter(EC_ROTH,year(timestamp)==2019)$Ta)*3600)
+EC_ROTH$ET.filled <- LE.to.ET(EC_ROTH$LE.filled, EC_ROTH$Ta)*3600
+EC_ROTH$ET.filled[which(EC_ROTH$ET.filled<=0)] <- 0
 
-ET_ROTH.Filled[which(ET_ROTH.Filled<=0)] <- 0
-sum(ET_ROTH.Filled)
+EC_ROTH$ET.filled[360:39400] <- na.approx(EC_ROTH$ET.filled[360:39400])
+summary(filter(EC_ROTH, year==2019)$ET.filled)
+
+# create a pallet for ET
+ETcolor = c(rep("#4575b4",1),rep("#74add1",1),rep("#abd9e9",1), rep("#e0f3f8",1),
+            rep("#ffffbf",1),rep("#fee090",1),rep("#fdae61",1),rep("#f46d43",1), 
+            rep("#d73027",1),  rep("#d73027",1), rep("#a50026",1), rep("#a50026",1))
+
+# plot 
+ggplot(filter(EC_ROTH,year==2019)) +
+  geom_raster(aes(x=DOY,y=hour,fill=ET.filled)) +
+  scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(5,365,15),limits=c(1,365)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,2),limits=c(0,24)) +
+  scale_fill_gradientn(breaks=seq(0,0.45,0.05),limits=c(0,0.45),
+                       colors=ETcolor, name="ET [mm/hour]",na.value = NA,
+                       guide =guide_colorbar(direction = "horizontal",
+                                             title.vjust=1,
+                                             label.vjust=16,
+                                             title.position = "left",label.position = "bottom",
+                                             barwidth = 20, barheight = 1,nbin = 20,
+                                             label.theme = element_text(angle = 0))) + 
+  theme(legend.position="bottom",
+        panel.background = element_rect(fill = "white"),  
+        panel.border = element_blank(), 
+        panel.grid.major = element_line(colour="white"),
+        panel.grid.minor = element_line(colour="white"))
 ###################################################################
 write.csv(EC_ROTH,
           #file="C:/Users/Alby Rocha/Documents/EC/FPmaps/data/EC_ROTH.csv", 

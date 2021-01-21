@@ -35,15 +35,15 @@ Gap_ROTH <- data.frame(DataTime=EC_ROTH$timestamp,
                        Tsoil=EC_ROTH$Ta-5,
                        rH=EC_ROTH$RH,
                        VPD=satVP(Tmean=EC_ROTH$Ta,interval='hour')*10*(1-EC_ROTH$RH/100),
-                       Ustar=sdClean(EC_ROTH$u.,3)) # excluding extreme values
+                       Ustar=sdClean(EC_ROTH$u.,5)) # excluding extreme values
 
 colnames(Gap_ROTH) <- colnames(EddyDataWithPosix) 
 
 #including data require to footprint 
-Gap_ROTH$L=sdClean(EC_ROTH$L,3) # excluding extreme values
+Gap_ROTH$L=sdClean(EC_ROTH$L,5) # excluding extreme values
 Gap_ROTH$wd=EC_ROTH$wd
 Gap_ROTH$ws=sdClean(EC_ROTH$ws,5) # excluding extreme values
-Gap_ROTH$v_var=sdClean(EC_ROTH$v_var,3) # excluding extreme values
+Gap_ROTH$v_var=sdClean(EC_ROTH$v_var,5) # excluding extreme values
 
 # Variables for gapfilling
 G_Roth <- sEddyProc$new('ROTH', Gap_ROTH, c('NEE','LE','Rg','Tair','VPD','Ustar',
@@ -110,6 +110,4 @@ ggplot(filter(EC_ROTH,year==2019)) +
         panel.grid.major = element_line(colour="white"),
         panel.grid.minor = element_line(colour="white"))
 ###################################################################
-write.csv(EC_ROTH,
-          #file="C:/Users/Alby Rocha/Documents/EC/FPmaps/data/EC_ROTH.csv", 
-          row.names = F)
+write.csv(EC_ROTH, file="EC_ROTH.csv", row.names = F)

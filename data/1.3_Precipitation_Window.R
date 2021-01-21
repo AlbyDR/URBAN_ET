@@ -3,6 +3,7 @@
 ##################################################
 window.prec <- NULL
 
+# from 0 to 400 hours ithout rain
 for (i in 1:400) {
 window.prec[[i]] <- data.frame(
   arrange(data.frame(row=unique(c(which(DWD_ROTH$H_precip==1)+i))),row),
@@ -30,14 +31,3 @@ for (i in 399:0) {
 
 DWD_ROTH$prec.window <- row_timestamp$prec.window
 write.csv(DWD_ROTH, file="DWD_ROTH.csv", row.names = F)
-
-row_timestamp <- filter(row_timestamp, year(timestamp)==2019)
-table(row_timestamp$prec.window)
-summary(row_timestamp$prec.window)
-
-DWD_ROTH19$prec.window <- row_timestamp$prec.window
-
-write.csv(DWD_ROTH19, file="DWD_ROTH19.csv", row.names = F)
-write.csv(DWD_ROTH19,
-          file="C:/Users/Alby Rocha/Documents/EC/SCOPEresults/DWD_ROTH19.csv", 
-          row.names = F)

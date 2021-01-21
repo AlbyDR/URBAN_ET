@@ -9,11 +9,25 @@ library(lubridate)    # date operations
 library(ggplot2)      # plots
 library(kwb.datetime) # timezone convertion
 ###########################################################################################
-###########################################################################################
 ### download the DWD data
 ### hourly data is devided in historical and recent data (need to adjust before merge)
 ### example for the station number 00403 (see Map_DWD_station to find the ideal station)
-###########################################################################################
+#####################################################
+#### DWD Weather data sets
+#####################################################
+#  air_temperature  ##   14-Nov-2018 08:11 # 1,2,5,7
+#  cloud_type       ##   14-Nov-2018 08:10 # 1,2,5,7
+#  cloudiness       ##   14-Nov-2018 08:10 # 1,2,5,7
+#  dew_point        ##   09-May-2019 08:51 # 1,2,5,7
+#  precipitation    ##   14-Nov-2018 08:11 # 1,2,5,7
+#  pressure         ##   14-Nov-2018 08:10 # 1,2,5,7
+#  soil_temperature ##   14-Nov-2018 08:12 # 1,2,5,7
+#  solar            ##   16-Jul-2020 08:45 # 7
+#  sun              ##   14-Nov-2018 08:11 # 1,2,5,7
+#  visibility       ##   14-Nov-2018 08:12 # 1,2,5,7
+#  wind             ##   14-Nov-2018 08:12 # 2,5,7
+#  wind_synop       ##   09-May-2019 08:51 # 1,2,5,7
+######################################################
 ###########################################################################################
 
 ###########################################################################################
@@ -514,3 +528,56 @@ colnames(dew_point) <- c("id", "timestamp", "QN_8" , "dewpoint.temp",
 #DWD_ROTH <- left_join(DWD_ROTH, dew_point[,c(2,4,5)], by="timestamp", type="left", match="first")
 #DWD_ROTH <- left_join(DWD_ROTH, soil.temp[,c(2,4,5,6,7,8,9)], by="timestamp", type="left", match="first")
 #############################################################################
+
+
+################################################################
+##################### Metadata #################################
+#################################################################
+#TT_TU # air temperature at 2m height (DWD station)
+#RF_TU # relative humidity at 2m height (DWDStation)
+#P0    # Pressure at station height (2m)
+#P     # Pressure at see level
+#R1    # hourly precipitation mm
+#RS_IND # 0 no precipitation 1 precipitation fell
+#WRTR   # WR precipitation form 
+# "V_TE002"   # temperature at 2 cm deepth  
+# "V_TE005"   # temperature at 5 cm deepth 
+# "V_TE010"   # temperature at 10 cm deepth 
+# "V_TE020"   # temperature at 20 cm deepth 
+# "V_TE050"   # temperature at 50 cm deepth 
+# "V_TE100"   # temperature at 100 cm deepth 
+#SD_SO) # sunshine duration - minutes
+#V_VV)   # Visibility in meter
+#V_VV_I) # from the observer
+#FF) # Average wind speed 
+#DD) # wind direction
+#TT) # dry bulb temperature at 2 meter above ground
+#TD) # dew point temperature at 2 meter above ground
+#V_N)     # Total coverage - eighth levels # same as cloudness
+#V_S1_CS) # V_S1_CS - Cloud type (see abbreviationbelow) of the 1st layer
+#V_S1_CSA)# V_S1_CSA - cloud type of 1st layer
+#V_S1_HHS)# V_S1_HHS - Cloud height of the 1st layer meters
+#V_S1_NS) # V_S1_NS - Degree of coverage of the 1st layer
+# V_S2_CS -  Cloud type of the 2nd layer code see overview
+# V_S2_CSA - cloud type_ abbreviation of 2 layer
+# V_S2_HHS - Cloud height of the 2nd layer meters
+# V_S2_NS - Degree of coverage of the 2nd layer
+# V_S3_CS - Cloud type of the 3rd layer Code see overview
+# V_S3_CSA - cloud type_ abbreviation of 3 layer
+# V_S3_HHS - Cloud height of the 3rd layer meters
+# V_S3_NS - Degree of coverage of the 3rd layer
+# V_S4_CS - Cloud type of the 4th layer code see overview
+# V_S4_CSA - cloud type_ abbreviation of 4th layer
+# V_S4_HHS - Cloud height of the 4th layer meters
+# V_S4_NS - Degree of coverage of the 4th layer
+# Cirrus        0 CI
+# Cirrocumulus  1 CC
+# Cirrostratus  2 CS
+# Altocumulus   3 AC
+# Altostratus   4 AS
+# Nimbostratus  5 NS
+# Stratocumulus 6 SC
+# Stratus       7 ST
+# Cumulus       8 CU
+# Cumulonimbus  9 CB
+# bei Instrumentenmessung -1 -1

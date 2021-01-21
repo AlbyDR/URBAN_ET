@@ -102,14 +102,9 @@ summary(DWD_ROTH$wd)
 
 # remane date to timestamp again
 colnames(DWD_ROTH)[c(1)] <- c("timestamp")
-
-head(DWD_ROTH[1])
-head(EC_ROTH[1])
-tail(DWD_ROTH[1])
-tail(EC_ROTH[1])
-# include prec windom variable                
-EC_ROTH$prec.window <- as.double(unlist(DWD_ROTH$prec.window[2:39505]))
-
+# include prec window variable                
+colnames(DWD_ROTH)
+EC_TUCC <- left_join(EC_ROTH, DWD_ROTH[,c(1,18)], by="timestamp")
 ##### cleaning the data based on precipitation events
 EC_ROTH$LE.dry <- EC_ROTH$LE
 EC_ROTH$LE.dry[EC_ROTH$prec.window<=4 & EC_ROTH$qc_LE!=2] <- NA

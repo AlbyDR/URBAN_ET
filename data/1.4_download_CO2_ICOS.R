@@ -1,4 +1,7 @@
 ############################################################################
+library(readr)     # read file
+library(dplyr)     # left_join
+library(lubridate) # ymd_hms
 ############################################################################
 ### atmospheric CO2 concentration 	              (Ca)	[ppm]
 ############################################################################
@@ -51,7 +54,8 @@ write.csv(ICOS_LIN_40, file="DWD_ROTH.csv", row.names = F)
 
 #########################################################################
 DWD_ROTH <- left_join(DWD_ROTH, ICOS_LIN_40[,c(13,9)], by = "timestamp")
-colnames(DWD_ROTH)[18] <- "CO2.ICOS"
+colnames(DWD_ROTH)
+colnames(DWD_ROTH)[19] <- "CO2.ICOS" # check the column index
 summary(DWD_ROTH$CO2.ICOS)
 write.csv(DWD_ROTH, file="DWD_ROTH.csv", row.names = F)
 #########################################################################

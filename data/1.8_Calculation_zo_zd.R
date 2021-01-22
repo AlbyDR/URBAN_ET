@@ -345,7 +345,7 @@ EC_ROTH <- read_csv("./data/EC_ROTH.csv",col_names = T,
 summary(EC_ROTH)
 
 # zo and zd calculation
-zd_z0_Roth = order_zd_z0(Zd_winter = winter_1_deg_running$Zd_deg_winter,
+zd_z0_ROTH = order_zd_z0(Zd_winter = winter_1_deg_running$Zd_deg_winter,
                     Z0_winter = winter_1_deg_running$Z0_deg_winter,
                     Zd_intermediate = intermediate_1_deg_running$Zd_deg_intermediate,
                     Z0_intermediate = intermediate_1_deg_running$Z0_deg_intermediate,
@@ -355,12 +355,12 @@ zd_z0_Roth = order_zd_z0(Zd_winter = winter_1_deg_running$Zd_deg_winter,
                     wind_direction = EC_ROTH$wd.filled
 )
 
-#write.csv(zd_z0_Roth, file="zd_z0_Roth.csv", row.names = F)
-#zd_z0_Roth <- read.csv("zd_z0_Roth.csv")
+#write.csv(zd_z0_ROTH, file="zd_z0_ROTH.csv", row.names = F)
+#zd_z0_Roth <- read.csv("zd_z0_ROTH.csv")
 
 #combining data
-EC_ROTH$zd <- zd_z0_Roth$zd
-EC_ROTH$z0 <- zd_z0_Roth$z0
+EC_ROTH$zd <- zd_z0_ROTH$zd
+EC_ROTH$z0 <- zd_z0_ROTH$z0
 
 EC_ROTH$zd.filled <- na.approx(EC_ROTH$zd)
 

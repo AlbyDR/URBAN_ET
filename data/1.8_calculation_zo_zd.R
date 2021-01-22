@@ -1,8 +1,8 @@
-########################################################################
+######################################################################
 library(tibble)     # glimpse
 library(readr)      # read
 library(xts)        # na.aprox
-########################################################################
+######################################################################
 
 ######################################################################
 ######################################################################
@@ -71,7 +71,6 @@ Kanda_z0 <- function(fai, pai, zstd, zH, zHmax, Cd = 1.2){
   }else{
     z_0_output <- A1*z0Mac
   }
-
   return(z_0_output)
 }
 
@@ -239,7 +238,6 @@ order_zd_z0 <- function(Zd_winter, Z0_winter, Zd_intermediate, Z0_intermediate,
 # calculate Z0 and Zd
 ############################################################################
 ############################################################################
-
 ##### read 1000m  360 by 1 degree
 ## ROTH
 Lambda_B_1deg <- read.csv("./data/ROTH_BH_1000m__IMPPoint_anisotropic.csv", header=TRUE, sep=",")
@@ -337,6 +335,7 @@ winter_1_deg_running = running_mean(data = winter_1deg)
 intermediate_1_deg_running = running_mean(data = intermediate_1deg)
 
 #############################################################
+#############################################################
 # read ECdata
 EC_ROTH <- read_csv("./data/EC_ROTH.csv",col_names = T,
                     cols(
@@ -344,7 +343,6 @@ EC_ROTH <- read_csv("./data/EC_ROTH.csv",col_names = T,
                       timestamp = col_datetime(format = ""),
                       prec.window = col_integer()))
 summary(EC_ROTH)
-
 
 # zo and zd calculation
 zd_z0_Roth = order_zd_z0(Zd_winter = winter_1_deg_running$Zd_deg_winter,

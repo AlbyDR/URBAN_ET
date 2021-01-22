@@ -50,7 +50,7 @@ sf_save <- function(z, fname) {
 # funtion to resample
 resample_to_footprint = function(r, footprint_rast) {
   r_new = raster::crop(x=r, y=extent(footprint_rast))  # first crop 
-  r_new = raster::resample(r_new, footprint_rast) # reproject
+  r_new = raster::projectRaster(r_new, footprint_rast) # reproject
   return(r_new)
 }
 ###########################################################################
@@ -498,6 +498,9 @@ Old_maps <- raster::stack(Veg_height_old_r,
                           water,
                           veg.cover_vh_old_r)
 
+names(Old_maps) <- c("Veg_height_old","impervious_old","building.height",
+                     "water","veg.cover_vh_old")
+
 plot(Old_maps[[1]])
 
 #stack all the stacks
@@ -506,5 +509,5 @@ atlas_r_maps <- raster::stack(Old_maps,
                               Atlas_r_GreenVolume,Atlas_r_Soil,
                               Atlas_r_ETmap)
 
-writeRaster(atlas_r_maps, filename="atlas_r_maps")
+writeRaster(atlas_r_maps, filename="atlas_r_maps", overwrite=TRUE)
 plot(atlas_r_maps[[30]])

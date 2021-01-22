@@ -7,12 +7,13 @@ library(spatialEco)
 library(sf)
 library(raster)
 library(sp)
+library(openair)
 ########################################################################
 
 ########################################################################
-########################################################################
 # Functions
 ########################################################################
+
 ########################################################################
 ### Function 1 - generate FP raster with probability 0.90
 create_footprint_raster <- function(fetch, height, grid, speed, direction, uStar, zol, sigmaV, percentage_in = F,date = NULL, lon, lat){
@@ -35,6 +36,7 @@ create_footprint_raster <- function(fetch, height, grid, speed, direction, uStar
                                        crs = sp::CRS("+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0"))
   return(foot_raster)
 }
+
 ########################################################################
 ### Function 2 - generate FP polygons 0.9
 footprint_polygon <- function(fetch, height, grid,
@@ -340,15 +342,14 @@ first_guess_fetch<- create_footprint_raster(fetch = fetch,
 
 #####################################################################
 #####################################################################
-# data
-#EC_ROTH <- read_csv("EC_ROTH.csv", col_names = T)
+# data (read data resulting from code 1.8)
+EC_ROTH <- read_csv("EC_ROTH.csv", col_names = T)
 summary(EC_ROTH)
 str(EC_ROTH)
 
 # 2019 +/- 1 month
 ROTH19plus1 <- filter(EC_ROTH, date(timestamp)>="2018-11-30" &
                                date(timestamp)<="2020-02-01")
-
 #write.csv(ROTH19plus1, file="ROTH19plus1.csv", row.names = F)
 
 # data from the tower
@@ -362,7 +363,7 @@ coordROTH_UTM = as.data.frame(coordROTH_UTM)
 ########################################################################
 
 #######################################################################
-# Generate one the footprints raster
+# Generate one the footprints raster to test
 #######################################################################
 # one footprint to test and resample the layers (funcion 1)
 fp_extent_ROTH <- create_footprint_raster(fetch = 1500,
@@ -379,7 +380,7 @@ fp_extent_ROTH <- create_footprint_raster(fetch = 1500,
 plot(fp_extent_ROTH)
 
 #######################################################################
-# Generate all the footprints polygon
+# Generate all the footprints as (external) polygon
 #######################################################################
 ## function footprint_polygon # clip=T (SP_90)
 fp_polygon_ROTH <- NULL
@@ -402,7 +403,7 @@ for (i in 1:length(ROTH19plus1$timestamp)) {
 plot(Atlas_r_GreenVolume[[1]])
 plot(fp_polygon_ROTH[[2]],add=T)
 
-##### footprints that fails
+##### footprints that have failed
 unique(diff(as.integer(index(fp_polygon_ROTH))))
 unlist(sapply(1:length(fp_polygon_ROTH),FUN=function(i) 
   ifelse(is.null(fp_polygon_ROTH[[i]]), print(i),0)))
@@ -415,11 +416,11 @@ fp_polygon_ROTH[[11245]] <- fp_polygon_ROTH[[11244]]
 fp_polygon_ROTH[[11782]] <- fp_polygon_ROTH[[11781]]
 fp_polygon_ROTH[[13551]] <- fp_polygon_ROTH[[13550]]
 
-#fp_polygon_ROTH[[10171]] <- NA
-#fp_polygon_ROTH[[10726]] <- NA
-#fp_polygon_ROTH[[11245]] <- NA
-#fp_polygon_ROTH[[11782]] <- NA
-#fp_polygon_ROTH[[13551]] <- NA
+fp_polygon_ROTH[[10171]] <- NA
+fp_polygon_ROTH[[10726]] <- NA
+fp_polygon_ROTH[[11245]] <- NA
+fp_polygon_ROTH[[11782]] <- NA
+fp_polygon_ROTH[[13551]] <- NA
 
 ######################################################################
 # Generate all the footprints as raster
@@ -444,7 +445,7 @@ for (i in 1:length(ROTH19plus1$timestamp)) {
 plot(Atlas_r_GreenVolume[[1]])
 plot(fp_raster_ROTH[[2]],add=T)
 
-##### footprints that fails
+##### footprints that have failed
 unique(diff(as.integer(index(fp_raster_ROTH))))
 unlist(sapply(1:length(fp_raster_ROTH),FUN=function(i) 
   ifelse(is.null(fp_raster_ROTH[[i]]), print(i),0)))
@@ -456,12 +457,11 @@ fp_raster_ROTH[[10726]] <- fp_raster_ROTH[[10725]]
 fp_raster_ROTH[[11245]] <- fp_raster_ROTH[[11244]]
 fp_raster_ROTH[[11782]] <- fp_raster_ROTH[[11781]]
 fp_raster_ROTH[[13551]] <- fp_raster_ROTH[[13550]]
-
-#values(fp_extent_ROTH_SP[[10171]]) <- NA
-#values(fp_extent_ROTH_SP[[10726]]) <- NA
-#values(fp_extent_ROTH_SP[[11245]]) <- NA
-#values(fp_extent_ROTH_SP[[11782]]) <- NA
-#values(fp_extent_ROTH_SP[[13551]]) <- NA
+values(fp_extent_ROTH_SP[[10171]]) <- NA
+values(fp_extent_ROTH_SP[[10726]]) <- NA
+values(fp_extent_ROTH_SP[[11245]]) <- NA
+values(fp_extent_ROTH_SP[[11782]]) <- NA
+values(fp_extent_ROTH_SP[[13551]]) <- NA
 
 ##### write the list as a stack raster
 STACkclipROTH <- stack(fp_raster_ROTH)
@@ -469,31 +469,17 @@ names(STACkclipROTH) <- ymd_hms(ROTH19plus1$timestamp)
 plot(STACkclipROTH[[10]])
 
 ###############################################################
-#writeRaster(STACkclipROTH, 
-#            filename = "FPclipROTH.tif",
-#            overwrite=TRUE)
+#writeRaster(STACkclipROTH, filename="FPclipROTH.tif", overwrite=TRUE)
 ###############################################################
-############ arguments to save separatly all rasters 
-#paste0("L", as.character(index(fp_extent_ROTH))),# to save separately
-#bylayer=TRUE, format='GTiff'                     # all layers
-######### or 
-#mapply(writeRaster, fp_extent_ROTH, 
-#       as.character(index(fp_extent_ROTH)), 'GTiff')
-###############################################################
-
 ###############################################################
 #### load the stack 
 #FPclipROTH <- stack("FPclipROTH.tif")
 #names(FPclipROTH) <- ymd_hms(ROTH19plus1$timestamp)
-#plot(FPclipROTH[[3000]])
-#length(FPclipROTH)/90000
-#tail(names(FPclipROTH))
 #################################################################
 
-
 #################################################################
 #################################################################
-# Extract layers from FP
+# Extract land surface values from the atlas layers by 30min FP
 #################################################################
 #################################################################
 # create the surface_cover_info file to extract land surfaces
@@ -502,7 +488,7 @@ maps_ROTH = resample_to_footprint(r=atlas_r_maps,
 plot(atlas_r_maps[[10]])
 plot(maps_ROTH[[10]])
 
-writeRaster(maps_ROTH,filename="maps_ROTH",overwrite=TRUE)
+#writeRaster(maps_ROTH,filename="maps_ROTH",overwrite=TRUE)
 
 names(maps_ROTH) <- c("layer1","layer2","layer3","layer4",
                        "layer5","layer6","layer7","layer8","layer9",
@@ -515,13 +501,7 @@ names(maps_ROTH) <- c("layer1","layer2","layer3","layer4",
 "layer40","layer41","layer42")
 ######################################################################
 
-
-######################################################################
-######################################################################
-# Extract land surface property from the layers with the FP
-######################################################################
-######################################################################
-### function 3 - clip=F
+# Extract land surface property usin the function 3 - clip=F
 fp_layers_ROTH <- NULL
 
 for (i in 1:length(ROTH19plus1$timestamp)) { 
@@ -554,6 +534,12 @@ fp_layers_ROTH[[10726]] <- fp_layers_ROTH[[10725]]
 fp_layers_ROTH[[11245]] <- fp_layers_ROTH[[11244]]
 fp_layers_ROTH[[11782]] <- fp_layers_ROTH[[11781]]
 fp_layers_ROTH[[13551]] <- fp_layers_ROTH[[13552]]
+              
+fp_layers_ROTH[[10171]] <- NA
+fp_layers_ROTH[[10726]] <- NA
+fp_layers_ROTH[[11245]] <- NA
+fp_layers_ROTH[[11782]] <- NA
+fp_layers_ROTH[[13551]] <- NA
 
 # transform list in df , for each variable
 #########################################################

@@ -317,7 +317,7 @@ coordROTH_UTM = as.data.frame(coordROTH_UTM)
 ########################################################################
 
 #######################################################################
-# Generate one the footprints raster to test
+# Generate one footprint raster to test and resample the Map layers
 #######################################################################
 # one footprint to test and resample the layers (funcion 1)
 fp_extent_ROTH <- create_footprint_raster(fetch = 1500,
@@ -334,7 +334,7 @@ fp_extent_ROTH <- create_footprint_raster(fetch = 1500,
 plot(fp_extent_ROTH)
 
 #######################################################################
-# Generate all the footprints as (external) polygon
+# Generate all the footprints as (external) polygons
 #######################################################################
 ## function footprint_polygon # clip=T (SP_90)
 fp_polygon_ROTH <- NULL
@@ -378,10 +378,11 @@ fp_polygon_ROTH[[11782]] <- NA
 fp_polygon_ROTH[[13551]] <- NA
 
 ######################################################################
-# Generate all the footprints as raster
+# Generate all footprints as raster (very big file - avoid run for all set)
 #######################################################################
 ## function footprint_weighted_SVV # clip true (clip1)
 fp_raster_ROTH <- NULL
+              
 for (i in 1:length(ROTH19plus1$timestamp)) { 
   fp_raster_ROTH[[i]] <- footprint_extraction(fetch = 1500,
                                               height = (zmROTH-ROTH19plus1$zd.filled[i]),
@@ -456,7 +457,7 @@ names(maps_ROTH) <- c("layer1","layer2","layer3","layer4",
 "layer34","layer35","layer36","layer37","layer38", "layer39",
 "layer40","layer41","layer42")
 ######################################################################
-# Extract land surface property usin the function 3 - clip=F
+# Extract land surface property using the function 3 - clip=F
 fp_layers_ROTH <- NULL
 
 for (i in 1:length(ROTH19plus1$timestamp)) { 

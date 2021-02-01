@@ -7,14 +7,15 @@ The codes are divided into:
 
 1- Data collection and preprocessing (R)
    1.1 DWD Data
-   1.2 ICOS EC/CO2 data
-   1.3 EC Data cleaning
-   1.4 RS Data
-   1.5 SCOPE parameters
-   1.6 Footprints
+   1.2 ICOS CO2 data
+   1.3 EC Data / cleaning
+   1.4 Atlas land cover maps
+   1.5 Footprints
+   1.6 RS Data
+   1.7 SCOPE input parameters
    
 2- Modelling (Matlab)
-   2.1 Original code
+   2.1 Original code (link)
    2.2 Iniciation code (.m) and set parameters file
    2.3 Input files (filenames_, input_data_, and setoptions_)
    

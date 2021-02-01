@@ -488,8 +488,12 @@ plot(water)
 
 # calculate veg. cover from veg.height
 veg.cover_vh_old_r <- Veg_height_old_r
-veg.cover_vh_old_r[] <- ifelse(Veg_height_old_r[] > 0.01, 1, 0)
+veg.cover_vh_old_r[] <- ifelse(Veg_height_old_r[] > 0.1, 1, 0)
+
 plot(Veg_height_old_r)
+plot(veg.cover_vh_old_r)
+summary(getValues(Veg_height_old_r))
+summary(getValues(veg.cover_vh_old_r))
 
 #stack old files
 Old_maps <- raster::stack(Veg_height_old_r,
@@ -506,8 +510,11 @@ plot(Old_maps[[1]])
 #stack all the stacks
 atlas_r_maps <- raster::stack(Old_maps,
                               Atlas_r_Imprevious,
-                              Atlas_r_GreenVolume,Atlas_r_Soil,
+                              Atlas_r_GreenVolume,
+                              Atlas_r_Soil,
                               Atlas_r_ETmap)
+
+names(atlas_r_maps)
 
 writeRaster(atlas_r_maps, filename="atlas_r_maps", overwrite=TRUE)
 plot(atlas_r_maps[[30]])

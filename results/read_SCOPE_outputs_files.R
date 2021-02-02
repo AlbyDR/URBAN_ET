@@ -1,19 +1,20 @@
 #########################################################################
-#### ROTH ############################################################
+#### Read the results from the SCOPE output files
+#########################################################################
+
 ########################################################################
-####################
 # SCOPE results LEtotal/LEsoil/LEcanopy
-####################
+########################################################################
+# list the name of all with the word ROTH
 Files.ROTH <- list.files(path=grep("ROTH",
                                    list.dirs(path = "D:/SCOPE-2.0N/SCOPE-2.0/output", 
                                              full.names = TRUE,
                                              recursive = F), 
-                                   value = TRUE),
-                         pattern= "fluxes.csv",
-                         full.names = T)
+                                             value = TRUE),
+                         pattern= "fluxes.csv", full.names = T)
 
 SCOPE_ROTH <- NULL
-
+# read all files of ROTH
 for (i in 1:length(Files.ROTH)) {
  SCOPE_ROTH[[i]] <- read_csv(Files.ROTH[i],
                              col_names =T,
@@ -23,7 +24,6 @@ for (i in 1:length(Files.ROTH)) {
 SCOPE_ROTH[[1]]
 summary(Input_ROTH)
 summary(SCOPE_ROTH[[11]])
-
 hist(SCOPE_ROTH[[1]]$nu_iterations)
 
 SCOPE_ROTH[[1]][c(6,11,16)]
@@ -51,16 +51,15 @@ Input.ROTH <- list.files(paste0(path=grep("ROTH",
                                    list.dirs(path="D:/SCOPE-2.0N/SCOPE-2.0/output", 
                                              full.names = TRUE,
                                              recursive = F), 
-                                   value = TRUE), "/Parameters",
-                                 collapse = NULL, recycle0 = FALSE),
-                         pattern= "filenames",
-                         full.names = T)
+                                             value = TRUE), "/Parameters",
+                                             collapse = NULL, recycle0 = FALSE),
+                                             pattern= "filenames",
+                                             full.names = T)
 
 Models_ROTH <- NULL
 for (i in 1:length(Input.ROTH)) {
   Models_ROTH[[i]] <- read_csv(Input.ROTH[i],
-                                 col_names =T)
-                               
+                                 col_names =T)                              
 }  
 
 print(as_tibble(Models_ROTH[[1]]), n=71)
@@ -70,7 +69,6 @@ for (i in 1:length(Models_ROTH)) {
   Parameters_ROTH[[i]] <- filter(Models_ROTH[[i]],!is.na(X2))$X2
 }
 
-
 ####################
 # SCOPE model settings
 ####################
@@ -78,11 +76,10 @@ Settings.ROTH <- list.files(paste0(path=grep("ROTH",
                                            list.dirs(path="D:/SCOPE-2.0N/SCOPE-2.0/output", 
                                                      full.names = TRUE,
                                                      recursive = F), 
-                                           value = TRUE), "/Parameters",
-                                 collapse = NULL, recycle0 = FALSE),
-                          pattern= "setoptions",
-                          full.names = T)
-
+                                                     value = TRUE), "/Parameters",
+                                                     collapse = NULL, recycle0 = FALSE),
+                                                     pattern= "setoptions",
+                                                     full.names = T)
 Settings_ROTH <- NULL
 for (i in 1:length(Settings.ROTH)) {
   Settings_ROTH[[i]] <- read_csv(Settings.ROTH[i],
@@ -99,10 +96,10 @@ Constants.ROTH <- list.files(paste0(path=grep("ROTH",
                                               list.dirs(path="D:/SCOPE-2.0N/SCOPE-2.0/output", 
                                                         full.names = TRUE,
                                                         recursive = F), 
-                                              value = TRUE), "/Parameters",
-                                    collapse = NULL, recycle0 = FALSE),
-                             pattern= "input_data",
-                             full.names = T)
+                                                        value = TRUE), "/Parameters",
+                                                        collapse = NULL, recycle0 = FALSE),
+                                                        pattern= "input_data",
+                                                        full.names = T)
 
 Constants_ROTH <- NULL
 for (i in 1:length(Constants.ROTH)) {
@@ -113,12 +110,9 @@ for (i in 1:length(Constants.ROTH)) {
 print(as_tibble(Constants_ROTH[[1]]), n=84)
 filter(Constants_ROTH[[1]],!is.na(PROSPECT))
 
-#############################################################################
-#############################################################################
-
 #########################################################################
-#### TUCC ############################################################
-########################################################################
+#### TUCC ###############################################################
+#########################################################################
 # SCOPE results LEtotal/LEsoil/LEcanopy
 ####################
 File.TUCC <- list.files(path=grep("TUCC",

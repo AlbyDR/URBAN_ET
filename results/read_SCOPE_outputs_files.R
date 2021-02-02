@@ -1,3 +1,6 @@
+library(readr)
+library(ggplot2)
+library(dplyr)
 #########################################################################
 #### Read the results from the SCOPE output files
 #########################################################################
@@ -29,20 +32,14 @@ hist(SCOPE_ROTH[[1]]$nu_iterations)
 SCOPE_ROTH[[1]][c(6,11,16)]
 
 ggplot(SCOPE_ROTH[[1]], aes(x=1:10225))+
-  geom_point(aes(y=lEtot))+
-  geom_point(aes(y=lECtot), color="blue")+
-  geom_point(aes(y=lEstot), color="red")
+  geom_point(aes(y=lEtot), color="blue")+
+  geom_point(aes(y=lEctot), color="green")+
+  geom_point(aes(y=lEstot), color="brown")
 
 ggplot(SCOPE_ROTH[[11]], aes(x=1:10225))+
-  geom_point(aes(y=lEtot))+
-  geom_point(aes(y=lEctot), color="blue")+
-  geom_point(aes(y=lEstot), color="red")
-
-ggplot(SCOPE_ROTH[[60]], aes(x=1:10225))+
-  geom_point(aes(y=lEtot))+
-  geom_point(aes(y=lEctot), color="blue")+
-  geom_point(aes(y=lEstot), color="red")
-
+  geom_point(aes(y=lEtot), color="blue")+
+  geom_point(aes(y=lEctot), color="green")+
+  geom_point(aes(y=lEstot), color="brown")
 
 ####################
 # SCOPE model inputs

@@ -274,7 +274,7 @@ footprint_extraction <- function(fetch, height, grid, speed, direction,
       "Prec_annual_r"= layer39,
       "Prec_summer_r" = layer40,   
       "Cap_ShallowRoot_r"= layer41, 
-      "Cap_deepRoot_r" = layer42, 
+      "Cap_deepRoot_r" = layer42 
     )
     return(result)
   }else{

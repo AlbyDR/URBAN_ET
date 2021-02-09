@@ -21,5 +21,6 @@ The codes are divided into:
    
 3- Results and Model accuracy assessment (R)
    3.1 Read SCOPE outputs
-   3.2 Calculate metrics
-   3.3 Plots, maps and figures
+   3.2 Apply the correction factor and calculate model metrics
+   3.3 Analysis of the footprint results
+   3.4 Plots, maps and figures

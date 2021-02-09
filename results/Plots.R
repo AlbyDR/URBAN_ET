@@ -1,3 +1,4 @@
+#######################################################################
 library(bigleaf)
 library(xts)
 library(scales)
@@ -11,6 +12,7 @@ library(ggspatial)
 library(sp)
 library(sf)
 library(raster)
+library(RColorBrewer)
 library(geobuffer) # geobuffer_pts
 library(gridExtra)
 #######################################################################
@@ -36,23 +38,19 @@ coord <- data.frame(
 # create a buffer around the tower
 pts_buf_1500m <- geobuffer_pts(xy=data.frame(lon=c(coord$Rothlon,coord$TUCClon),
                                              lat=c(coord$Rothlat,coord$TUCClat)), 
-                               dist_m=1500,
-                               #crs="+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs",
-                               output = "sp")
+                               dist_m=1500, output = "sp")
 
 summary(pts_buf_1500m)
 buf_1500m <- spTransform(pts_buf_1500m, CRS("+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs"))
 
 plot(atlas_r_maps$Veg_cover,axes=F,box=F) #,horizontal=TRUE,legend.args=list(text='impervious (%)')
 plot(buf_1500m, add=T, lwd=.5, fg=2)  
-
 ###################################################################
 ## Tower and DWD points 
 points <- data.frame(
   x = c(385566.5, 384597.4, 386525.1,385368.3),
   y = c(5813229, 5812858, 5819332,5825159),
   city = c("ROTH", "DWD_Dahlem", "TUCC", "DWD_Tegel"))
-
 ###################################################################
 # green pallets 
 myPal <- list(RColorBrewer::brewer.pal('Greens', n=9),
@@ -64,7 +62,6 @@ myPal <- list(RColorBrewer::brewer.pal('Greens', n=9),
                 '#41ab5d','#238b45',"#006d2c","#00441b"),
               c("#f7fcf0","#ccebc5", "#8BD000","#56C200", "#28B400",
                 "#00A600","#006837", "#006d2c", "#00441b"))
-
 ###################################################################
 # Vegetation Height Berlin
 ggplot() +
@@ -110,7 +107,6 @@ ggplot() +
         legend.box.spacing = unit(-1.5, "lines"),
         panel.grid.major = element_blank(), 
         panel.background = element_rect("white"))
-
 ###################################################################
 # vegetation cover maps
 FP_ROTH_polygon <- as_Spatial(st_geometry(fp_polygon_ROTHeg[[2]]))
@@ -198,7 +194,6 @@ ggplot() +
         legend.box.spacing = unit(-1.5, "lines"),
         panel.grid.major = element_blank(), 
         panel.background = element_rect("white"))
-
 ###################################################################
 
 #######################################################################
@@ -267,9 +262,7 @@ plotVARs$veg.cover.TUCC <- na.approx(FP_TUCC$Veg_cover)
 plotVARs$impervious.TUCC <- na.approx(FP_TUCC$Impervious_With_str)
 
 summary(plotVARs$ETo.EC.ROTH)
-
 summary(plotVARs)
-
 
 ##########################################################################
 # Figure #2 - 5 plots combined
@@ -378,11 +371,9 @@ grid_fig1 <- plot_grid(plotTa,plotRin,plotLAI,plotprecmm,plotET, align="v",ncol=
 #egg::ggarrange(plotTa,plotRin,plotLAI,plotprecmm,plotET,
 #               heights = c(0.15,0.15,0.15,0.15,0.4))
 
-
 ##########################################################################
 # Figure #3 - 6 scatterplots combined
 ##########################################################################
-
 #Plot ETos 
 cor(plotVARs$ETo.DWD.ROTH,plotVARs$ETo.EC.ROTH)
 cor(plotVARs$ETo.DWD.TUCC,plotVARs$ETo.EC.TUCC)
@@ -437,7 +428,7 @@ scatt3 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-
+# plot SCOPE.ETo
 scatt4 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
   geom_point(aes(x=ETc.ROTH0,y=SCOPE.ETo.ROTH.adj), color= "green", alpha = 0.1) + 
   geom_point(aes(x=ETc.TUCC0,y=SCOPE.ETo.TUCC.adj), color= "blue", alpha = 0.1) +   
@@ -453,7 +444,7 @@ scatt4 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-
+# plot SCOPE.DWD
 scatt5 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
   geom_point(aes(x=ETc.ROTH0,y=SCOPE.DWD.ROTH.adj), color= "green", alpha = 0.1) + 
   geom_point(aes(x=ETc.TUCC0,y=SCOPE.DWD.TUCC.adj), color= "blue", alpha = 0.1) +   
@@ -469,8 +460,7 @@ scatt5 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-
-### plot ETo adj
+### plot SCOPE RS
 scatt6 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
   geom_point(aes(x=ETc.ROTH0,y=SCOPE.RS.ROTH.adj), color= "green", alpha = 0.1) + 
   geom_point(aes(x=ETc.TUCC0,y=SCOPE.RS.TUCC.adj), color= "blue", alpha = 0.1) + 
@@ -486,7 +476,7 @@ scatt6 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-
+# combine in a grid
 plot_grid(scatt1,scatt2,scatt1,scatt1,scatt1,scatt1, align="v",ncol=3,
           #rel_heights=c(0.15,0.15,0.15,0.15,0.4), 
           #hjust=c(-6.5,-6.5,-7,-6.5,-6.5), vjust=1.6,
@@ -612,7 +602,6 @@ plotEThour_TU <- ggplot(filter(Mean_h_results_ET, year==2019), aes(x=hour)) +
                                         colour = "white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-
 mean(filter(Mean_h_results_ET, year==2019)$prech_TUCC)
 mean(filter(Mean_h_results_ET, year==2019)$prech_ROTH)
 
@@ -681,7 +670,6 @@ plot.fraction <- ggplot(filter(Mean_h_results_ET, year==2019), aes(x=hour)) +
                                         colour = "white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-
 plot_grid(plotprech,plot.fraction,plotEThour_RO,plotEThour_TU, align="v",ncol=1,
           rel_heights=c(0.2,0.2,0.25,0.35), 
           labels = c("a)","b)","c)","d)","e)","f)"), #labels="auto",
@@ -690,13 +678,8 @@ plot_grid(plotprech,plot.fraction,plotEThour_RO,plotEThour_TU, align="v",ncol=1,
 ##########################################################################
 # Figure #5 - 3 smoothly plots combined
 ##########################################################################
-
-##########################################################################
-# Figure #6 - 6 doy/24hours plots combined
-##########################################################################
-
 ###########################################################################
-summary(plotVARs$SCOPE.ETo.ROTH.adjB)
+summary(plotVARs)
 ###########################################################################
 plot_smoothRO <- ggplot(plotVARs,aes(x=date(timestamp)))+
   stat_smooth(formula=y~splines::bs(x,24),aes(y=ETc.ROTH, color="ET", fill="ET"),size=1) +
@@ -811,7 +794,7 @@ plot_errorTU <- ggplot(plotVARs,aes(x=date(timestamp)))+
                ylim = c(-0.02, 0.02))+
   scale_x_date(date_labels = "%b",date_breaks = "month", breaks = pretty_breaks(),
                expand = c(0, 0)) + #
-  labs(x = "month (2019)", y = 'Error [mm/h]') +
+  labs(x = "month (2019)", y = 'error [mm/h]') +
   #ggtitle("C) TUCC model error (observed - predicted)") +
     theme(legend.position = "bottom",
           legend.box.spacing = unit(-0.05, "lines"),
@@ -868,104 +851,9 @@ plot_grid(plot_errorRO,plotPrecSmooth,plot_errorTU, align="v",ncol=1,
           labels = c("a)","b)","c)"), #labels="auto",
           label_size = 10)
 
-#
-summary(filter(EC_ROTH,year(timestamp)==2019)$water)
-summary(filter(EC_TUCC,year(timestamp)==2019)$water)
-summary(filter(EC_ROTH,year(timestamp)==2019)$veg.cover)
-summary(filter(EC_TUCC,year(timestamp)==2019)$veg.cover)
-summary(filter(EC_ROTH,year(timestamp)==2019)$impervious)
-summary(filter(EC_TUCC,year(timestamp)==2019)$impervious)
-summary(filter(EC_ROTH,year(timestamp)==2019)$building.h)
-summary(filter(EC_TUCC,year(timestamp)==2019)$building.h)
-summary(filter(EC_ROTH,year(timestamp)==2019)$veg.height)
-summary(filter(EC_TUCC,year(timestamp)==2019)$veg.height)
-plot(filter(EC_TUCC,year(timestamp)==2019)$water)
-plot(filter(EC_ROTH,year(timestamp)==2019)$Max_prob)
-
-cor.test(filter(EC_ROTH,year(timestamp)==2019)$veg.cover,
-         filter(plotVARs,year(timestamp)==2019)$ETc.ROTH)
-
-cor.test(filter(EC_ROTH,year(timestamp)==2019)$impervious,
-         filter(plotVARs,year(timestamp)==2019)$ETc.ROTH)
-
-cor.test(filter(EC_TUCC,year(timestamp)==2019)$veg.cover,
-         filter(plotVARs,year(timestamp)==2019)$ETc.TUCC)
-
-cor.test(filter(EC_TUCC,year(timestamp)==2019)$impervious,
-         filter(plotVARs,year(timestamp)==2019)$ETc.TUCC)
-
-# missing data
-summary(filter(plotVARs,year(timestamp)==2019))
-nrow(filter(plotVARs,year(timestamp)==2019))
-3767/8760
-3685/8760
-889/8760
-698/8760
-
-summary(filter(plotVARs,year(timestamp)==2019))
-# annually precipitation
-sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH)
-sum(filter(plotVARs,year(timestamp)==2019)$ETo.DWD.ROTH.adj)
-477.0635/506.45 #94%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.ETo.ROTH.adj)
-313.2027/506.45 #62%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.DWD.ROTH.adj)
-310.0524/506.45 #61%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.RS.ROTH.adj)
-327.624/506.45 #65%
-## gap-filling
-sum(filter(plotVARs,year(timestamp)==2019 & ET.ROTH.filled>=0)$ET.ROTH.filled)
-335.7713/506.45      #66%
-
-sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC)
-sum(filter(plotVARs,year(timestamp)==2019)$ETo.DWD.TUCC.adj)
-235.5756/400.95 #59%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.ETo.TUCC.adj)
-147.3851/400.95 #37%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.DWD.TUCC.adj)
-146.2495/400.95 #36%
-sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.RS.TUCC.adj)
-150.9763/400.95 #38%
-## gap-filling
-sum(filter(plotVARs,year(timestamp)==2019 & ET.TUCC.filled>=0)$ET.TUCC.filled)
-188.0523/400.95 #47%
-
-summary(filter(FP_ROTH,year(timestamp)==2019)$ET_r)
-summary(filter(FP_TUCC,year(timestamp)==2019)$ET_r)
-
-plotVARs$month <- month(plotVARs$timestamp)
-plotVARs$year <- year(plotVARs$timestamp)
-
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$ETo.DWD.ROTH.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.ETo.ROTH.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.DWD.ROTH.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.RS.ROTH.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$Precmm.ROTH, na.rm=T),2))
-#          1    2     3     4     5     6     7     8     9     10    11    12
-#[ETo]   5.48 14.22 21.15 53.32 53.19 87.53 67.22 63.66 36.59 18.04  5.69  5.83
-#[SCOPE] 5.06 10.15 14.24 34.01 36.94 67.17 50.97 47.27 26.34 13.34  5.02  5.22
-#[prec] 48.00 18.80 61.80  6.00 39.50 75.10 54.90 28.20 55.25 55.10 34.90 28.90
-
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$ETo.DWD.TUCC.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.ETo.TUCC.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.DWD.TUCC.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$SCOPE.RS.TUCC.adj, na.rm=T),2))
-sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
-                                                & year==2019)$Precmm.TUCC, na.rm=T),2))
-#          1    2     3     4     5     6     7     8     9     10    11    12
-#[ETo]   3.33  6.75  9.86 38.55 29.14 48.76 27.95 31.76 17.16 10.30  4.20  3.61
-#[SCOPE] 2.70  5.28  6.42 24.75 19.18 35.32 22.98 23.89 12.42  7.20  2.91  2.51
-#[prec] 40.80 21.40 62.10  7.50 39.50 26.10 25.20 10.30 55.20 47.80 37.85 27.20
-
+##########################################################################
+# Figure #6 - 6 doy/24hours plots combined
+##########################################################################
 ### Plots DOY/hour 
 #####################################################################################
 ## pallets
@@ -975,34 +863,30 @@ LEcolorG = c(rep("#40004b",1),rep("#762a83",1),rep("#9970ab",1), rep("#c2a5cf",1
 ### blue to blue
 LEcolorB = c(rep("#67001f",1),rep("#b2182b",1),rep("#d6604d",1), rep("#f4a582",1), rep("#fddbc7",1),
              rep("#d1e5f0",1),rep("#92c5de",1),rep("#4393c3",1),rep("#2166ac",1), rep("#053061",1))
-
 ETcolor = c(rep("#4575b4",1),rep("#abd9e9",1),
-            rep("#ffffbf",1),rep("#f46d43",1), 
-            rep("#d73027",1), rep("#d73027",1), rep("#a50026",1))
+            rep("#ffffbf",1),rep("#f46d43",1), rep("#d73027",1), rep("#d73027",1), rep("#a50026",1))
 ####################################################################################
 summary(plotVARs$ETc.ROTH0)
 summary(plotVARs$ETo.DWD.ROTH.adj)
-summary(plotVARs$SCOPE.ETo.ROTH.adj)
-summary(plotVARs$SCOPE.DWD.ROTH.adj)
-summary(plotVARs$SCOPE.RS.ROTH.adj)
+summary(plotVARs$SCOPE.ETo.ROTH.adjB)
+summary(plotVARs$SCOPE.DWD.ROTH.adjB)
+summary(plotVARs$SCOPE.RS.ROTH.adjB)
 
 Plot_ROTH_ET <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ETc.ROTH0)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("ROTH - observed ET (cleaned)") +
-  theme(legend.position = "bottom",
-        legend.box.spacing = unit(-0.03, "lines"),
-        legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+  #ggtitle("ROTH - observed ET (cleaned)") +
+  theme(#legend.position = "bottom",
+        #legend.box.spacing = unit(-0.03, "lines"),
+        #legend.title = element_text(color="grey25", vjust=.9, size=9),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        #axis.title.x = element_text(color = "grey25",face="bold",size=10,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1016,20 +900,18 @@ Plot_ROTH_ET <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
 Plot_ROTH_ET.fill <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ET.ROTH.filled0)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("ROTH - Observed ET (gap-filled with MDS)") +
-  theme(legend.position = "bottom",
-        legend.box.spacing = unit(-0.03, "lines"),
-        legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+  #ggtitle("ROTH - Observed ET (gap-filled with MDS)") +
+  theme(#legend.position = "bottom",
+        #legend.box.spacing = unit(-0.03, "lines"),
+        #legend.title = element_text(color="grey25", vjust=.9, size=7),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        #axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1040,24 +922,21 @@ Plot_ROTH_ET.fill <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         panel.grid.minor = element_line(colour="white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-
 Plot_ROTH_ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ETo.DWD.ROTH.adj)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("ROTH - ETo (corrected)") +
+  #ggtitle("ROTH - ETo (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1069,22 +948,20 @@ Plot_ROTH_ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_ROTH_SCOPE.ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.ETo.ROTH.adj)) + 
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.ETo.ROTH.adjB)) + 
   scale_x_continuous(name =NULL, expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("ROTH - SCOPE_ETo (corrected)") +
+  #ggtitle("ROTH - SCOPE_ETo (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1096,26 +973,24 @@ Plot_ROTH_SCOPE.ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_ROTH_SCOPE.DWD <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.DWD.ROTH.adj)) + 
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.DWD.ROTH.adjB)) + 
   scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),colors=ETcolor, 
- #                      name=NULL,na.value=NA, guide=NULL) + 
-                       name="ET [mm/hour]",na.value = NA,
-                       guide =guide_colorbar(direction = "horizontal",
-                                             title.position = "left",label.position = "bottom",
-                                             barwidth = 8, barheight = 0.8,nbin = 100,
-                                             label.theme = element_text(angle = 0,size=8))) + 
-  ggtitle("ROTH - SCOPE_DWD (corrected)") +
+                       name=NULL,na.value=NA, guide=NULL) + 
+                    #   name="ET [mm/hour]",na.value = NA,
+                    #   guide =guide_colorbar(direction = "horizontal",
+                    #                         title.position = "left",label.position = "bottom",
+                    #                         barwidth = 8, barheight = 0.8,nbin = 100,
+                    #                         label.theme = element_text(angle = 0,size=8))) + 
+  #ggtitle("ROTH - SCOPE_DWD (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=10,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1127,9 +1002,9 @@ Plot_ROTH_SCOPE.DWD <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_ROTH_SCOPE.RS <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.ROTH.adj)) + 
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.ROTH.adjB)) + 
   scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value=NA, guide=NULL) + 
   #                       name="ET [mm/hour]",na.value = NA,
@@ -1137,16 +1012,14 @@ Plot_ROTH_SCOPE.RS <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   #                                             title.position = "left",label.position = "bottom",
   #                                             barwidth = 8, barheight = 0.8,nbin = 100,
   #                                             label.theme = element_text(angle = 0,size=8))) + 
-  ggtitle("ROTH - SCOPE_RS (corrected)") +
+  #ggtitle("ROTH - SCOPE_RS (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x=element_text(color="grey25",face="bold",size=10,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1157,91 +1030,119 @@ Plot_ROTH_SCOPE.RS <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         panel.grid.minor = element_line(colour="white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-library(cowplot)
-grid1 <- plot_grid(Plot_ROTH_ET, Plot_ROTH_ET.fill,  labels = c("a)","b)"),label_size = 10)
-grid2 <- plot_grid(Plot_ROTH_ETo, Plot_ROTH_SCOPE.ETo, labels = c("c)","d)"),label_size = 10)
-grid3 <- plot_grid(Plot_ROTH_SCOPE.DWD, Plot_ROTH_SCOPE.RS, labels = c("e)","f)"),label_size = 10)
+legend_ET <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.ROTH.adjB)) + 
+  #scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
+  #scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
+  scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),colors=ETcolor, 
+     name="ET [mm/hour]",na.value = NA,
+     guide =guide_colorbar(direction = "horizontal",
+                           title.position = "left",
+                           label.position = "bottom",
+                           barwidth =18, barheight =0.9,nbin = 20,
+                           label.theme = element_text(angle = 0,size=11))) + 
+  theme(legend.position = "bottom",
+        legend.box.spacing = unit(-0.03, "lines"),
+        legend.title = element_text(color="grey25", vjust=.9, size=12),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        panel.spacing.y = unit(-0.5, "lines"), 
+        panel.spacing.x = unit(0.075, "lines"), 
+        panel.background = element_rect(fill = "white"),  
+        panel.border = element_blank(), 
+        panel.grid.major = element_line(colour="white"),
+        panel.grid.minor = element_line(colour="white"),
+        plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-egg::ggarrange(grid1,grid2,grid3,heights = c(0.32,0.33,0.35))
+legend <- cowplot::get_legend(legend_ET)
 
+grid::grid.newpage()
+grid::grid.draw(legend)
+
+ggdraw(plot_grid(
+  plot_grid(Plot_ROTH_ET, Plot_ROTH_ET.fill, Plot_ROTH_ETo,
+           Plot_ROTH_ETo, Plot_ROTH_SCOPE.DWD, Plot_ROTH_SCOPE.RS,
+           align="v",ncol=2, rel_heights=c(0.33,0.32,0.35,0.33,0.32,0.35), 
+          labels = c("a)","b)","c)","d)","e)","f)"), label_size = 12),
+  plot_grid(NULL, legend, ncol=2, rel_widths=c(0.05,0.95)), 
+  nrow=2, rel_heights=c(0.90,0.1)))
+
+#### TUCC
 summary(plotVARs$ETc.TUCC0)
 summary(plotVARs$ETo.DWD.TUCC.adj)
-summary(plotVARs$SCOPE.ETo.TUCC.adj)
-summary(plotVARs$SCOPE.DWD.TUCC.adj)
-summary(plotVARs$SCOPE.RS.TUCC.adj)
+summary(plotVARs$SCOPE.ETo.TUCC.adjB)
+summary(plotVARs$SCOPE.DWD.TUCC.adjB)
+summary(plotVARs$SCOPE.RS.TUCC.adjB)
 
 Plot_TUCC_ET <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ETc.TUCC0)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("TUCC - observed ET (cleaned)") +
-  theme(legend.position = "bottom",
-        legend.box.spacing = unit(-0.03, "lines"),
-        legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        strip.background = element_blank(),
-        strip.text.x = element_blank(),
-        panel.spacing.y = unit(-0.5, "lines"), 
-        panel.spacing.x = unit(0.075, "lines"), 
-        panel.background = element_rect(fill = "white"),  
-        panel.border = element_blank(), 
-        panel.grid.major = element_line(colour="white"),
-        panel.grid.minor = element_line(colour="white"),
-        plot.title = element_text(size=9, vjust=-1,hjust=0))
+  #ggtitle("TUCC - observed ET (cleaned)") +
+  theme(#legend.position = "bottom",
+    #legend.box.spacing = unit(-0.03, "lines"),
+    #legend.title = element_text(color="grey25", vjust=.9, size=9),
+    axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+    axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+    axis.text.x = element_text(color="grey25", size=10),
+    #axis.title.x = element_text(color = "grey25",face="bold",size=10,vjust=1.2),
+    strip.background = element_blank(),
+    strip.text.x = element_blank(),
+    panel.spacing.y = unit(-0.5, "lines"), 
+    panel.spacing.x = unit(0.075, "lines"), 
+    panel.background = element_rect(fill = "white"),  
+    panel.border = element_blank(), 
+    panel.grid.major = element_line(colour="white"),
+    panel.grid.minor = element_line(colour="white"),
+    plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_TUCC_ET.fill <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ET.TUCC.filled0)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("TUCC - observed ET (gap-filled)") +
-  theme(legend.position = "bottom",
-        legend.box.spacing = unit(-0.03, "lines"),
-        legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        strip.background = element_blank(),
-        strip.text.x = element_blank(),
-        panel.spacing.y = unit(-0.5, "lines"), 
-        panel.spacing.x = unit(0.075, "lines"), 
-        panel.background = element_rect(fill = "white"),  
-        panel.border = element_blank(), 
-        panel.grid.major = element_line(colour="white"),
-        panel.grid.minor = element_line(colour="white"),
-        plot.title = element_text(size=9, vjust=-1,hjust=0))
+  #ggtitle("TUCC - Observed ET (gap-filled with MDS)") +
+  theme(#legend.position = "bottom",
+    #legend.box.spacing = unit(-0.03, "lines"),
+    #legend.title = element_text(color="grey25", vjust=.9, size=7),
+    axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+    axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+    axis.text.x = element_text(color="grey25", size=10),
+    #axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
+    strip.background = element_blank(),
+    strip.text.x = element_blank(),
+    panel.spacing.y = unit(-0.5, "lines"), 
+    panel.spacing.x = unit(0.075, "lines"), 
+    panel.background = element_rect(fill = "white"),  
+    panel.border = element_blank(), 
+    panel.grid.major = element_line(colour="white"),
+    panel.grid.minor = element_line(colour="white"),
+    plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_TUCC_ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
   geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=ETo.DWD.TUCC.adj)) + 
   scale_x_continuous(name =NULL,expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("TUCC - ETo (corrected) ") +
-    ggtitle("TUCC - ETo (corrected) ") +
+  #ggtitle("TUCC - ETo (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1253,22 +1154,20 @@ Plot_TUCC_ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_TUCC_SCOPE.ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.ETo.TUCC.adj)) + 
-  scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
-  scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.ETo.TUCC.adjB)) + 
+  scale_x_continuous(name =NULL, expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
+  scale_fill_gradientn(breaks=seq(0,0.5,0.05),limits=c(0,0.5),
                        colors=ETcolor, name=NULL,na.value = NA,
                        guide =NULL) + 
-  ggtitle("TUCC - SCOPE_ETo (corrected)") +
+  #ggtitle("TUCC - SCOPE_ETo (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=8,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1280,25 +1179,24 @@ Plot_TUCC_SCOPE.ETo <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
 Plot_TUCC_SCOPE.DWD <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.DWD.TUCC.adj)) + 
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.DWD.TUCC.adjB)) + 
   scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
-  scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),
-                       colors=ETcolor, name="ET [mm/hour]",na.value = NA,
-                       guide =guide_colorbar(direction = "horizontal",
-                                             title.position = "left",label.position = "bottom",
-                                             barwidth = 8, barheight = 0.8,nbin = 100,
-                                             label.theme = element_text(angle = 0,size=8))) + 
-  ggtitle("TUCC - SCOPE_DWD (corrected)") +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
+  scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),colors=ETcolor, 
+                       name=NULL,na.value=NA, guide=NULL) + 
+  #   name="ET [mm/hour]",na.value = NA,
+  #   guide =guide_colorbar(direction = "horizontal",
+  #                         title.position = "left",label.position = "bottom",
+  #                         barwidth = 8, barheight = 0.8,nbin = 100,
+  #                         label.theme = element_text(angle = 0,size=8))) + 
+  #ggtitle("TUCC - SCOPE_DWD (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x = element_text(color = "grey25",face="bold",size=10,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1308,28 +1206,26 @@ Plot_TUCC_SCOPE.DWD <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         panel.grid.major = element_line(colour="white"),
         panel.grid.minor = element_line(colour="white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
-
 
 Plot_TUCC_SCOPE.RS <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
-  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.TUCC.adj)) + 
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.TUCC.adjB)) + 
   scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
-  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,6),limits=c(0,24)) +
+  scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
   scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),
-                       colors=ETcolor, name="ET [mm/hour]",na.value = NA,
-                       guide =guide_colorbar(direction = "horizontal",
-                                             title.position = "left",label.position = "bottom",
-                                             barwidth = 8, barheight = 0.8,nbin = 100,
-                                             label.theme = element_text(angle = 0,size=8))) + 
-  ggtitle("TUCC - SCOPE_RS (corrected)") +
+                       colors=ETcolor, name=NULL,na.value=NA, guide=NULL) + 
+  #                       name="ET [mm/hour]",na.value = NA,
+  #                       guide =guide_colorbar(direction = "horizontal",
+  #                                             title.position = "left",label.position = "bottom",
+  #                                             barwidth = 8, barheight = 0.8,nbin = 100,
+  #                                             label.theme = element_text(angle = 0,size=8))) + 
+  #ggtitle("TUCC - SCOPE_RS (corrected)") +
   theme(legend.position = "bottom",
         legend.box.spacing = unit(-0.03, "lines"),
         legend.title = element_text(color="grey25", vjust=.9, size=7),
-        axis.text.y = element_text(color="grey25", hjust=.9, size=7),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.text.x = element_text(color="grey25", size=7),
-        axis.title.x = element_text(color = "grey25", 
-                                    face="bold",size=8,vjust=1.2),
+        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x=element_text(color="grey25",face="bold",size=10,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
         panel.spacing.y = unit(-0.5, "lines"), 
@@ -1340,693 +1236,123 @@ Plot_TUCC_SCOPE.RS <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
         panel.grid.minor = element_line(colour="white"),
         plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-library(cowplot)
-grid1 <- plot_grid(Plot_ROTH_ET, Plot_ROTH_ET.fill,  labels = c("a)","b)"),label_size = 10)
-grid2 <- plot_grid(Plot_ROTH_ETo, Plot_ROTH_SCOPE.ETo, labels = c("c)","d)"),label_size = 10)
-grid3 <- plot_grid(Plot_ROTH_SCOPE.DWD, Plot_ROTH_SCOPE.RS, labels = c("e)","f)"),label_size = 10)
-
-grid4 <- plot_grid(Plot_TUCC_ET, Plot_TUCC_ETo, labels = c("e)","f)"),label_size = 10)
-grid5 <- plot_grid(Plot_TUCC_SCOPE.ETo, Plot_TUCC_SCOPE.RS, labels = c("g)","h)"),label_size = 10)
-grid6 <- plot_grid(Plot_TUCC_SCOPE.ETo, Plot_TUCC_SCOPE.RS, labels = c("g)","h)"),label_size = 10)
-
-egg::ggarrange(grid1,grid2,grid3,heights = c(0.3,0.3,0.4))
-
-#####################################################################
-#####################################################################
-
-
-#####################################################################
-#####################################################################
-
-ggplot(filter(plot_rainh, year==2019), aes(x=hour)) +
-  #geom_line(aes(y=ETo_adj1.avg),size=.75, colour="orange") +
-  #geom_line(aes(y=SCOPE_adj1.avg),size=.75, colour="green") +
-  #geom_line(aes(y=SCOPE_adj2.avg),size=.75, colour="darkgreen") +
-  #geom_line(aes(y=ET.avg),size=.75, colour="grey95") +
-  geom_line(aes(y=rain24.avg),size=.5, colour="black") +  
-  geom_line(aes(y=rain18.avg),size=.5, colour="grey5") +
-  geom_line(aes(y=rain15.avg),size=.5, colour="grey15") +
-  geom_line(aes(y=rain12.avg),size=.5, colour="grey25") +
-  geom_line(aes(y=rain9.avg),size=.5, colour="grey35") +
-  geom_line(aes(y=rain6.avg),size=.5, colour="grey45") +
-  geom_line(aes(y=rain3.avg),size=.5, colour="grey65") +
-  geom_line(aes(y=rain0.avg),size=.5, colour="grey85") +
-  labs(x = "hour (month average)", y = 'ET (mm/h)') +
-  facet_wrap(.~factor(month), ncol=6)+
+legend_ET <- ggplot(filter(plotVARs,year(timestamp)==2019)) +
+  geom_raster(aes(x=yday(timestamp),y=hour(timestamp),fill=SCOPE.RS.TUCC.adjB)) + 
+  #scale_x_continuous("day of year (2019)",expand=c(0,0),breaks=seq(0,350,25),limits=c(1,365)) +
+  #scale_y_continuous("hour",expand=c(0,0),breaks=seq(0,24,4),limits=c(0,24)) +
+  scale_fill_gradientn(breaks=seq(0,0.5,0.1),limits=c(0,0.5),colors=ETcolor, 
+                       name="ET [mm/hour]",na.value = NA,
+                       guide =guide_colorbar(direction = "horizontal",
+                                             title.position = "left",
+                                             label.position = "bottom",
+                                             barwidth =18, barheight =0.9,nbin = 20,
+                                             label.theme = element_text(angle = 0,size=11))) + 
   theme(legend.position = "bottom",
+        legend.box.spacing = unit(-0.03, "lines"),
+        legend.title = element_text(color="grey25", vjust=.9, size=12),
         axis.text.y = element_text(color="grey25", hjust=.9, size=9),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=10,vjust=1.2),
-        #strip.background = element_blank(),
-        #strip.text.x = element_blank(),
-        #panel.spacing=unit(0, "lines"), 
-        panel.background = element_rect(fill = "white"), 
-        panel.grid.major = element_line(colour="white"),
-        panel.grid.minor = element_line(colour="white"))
-
-cor_rain <-sapply(6:31, FUN=function(i) 
- round(cor(plot_rain$SCOPE_adj2,plot_rain[,i],use="complete.obs"),2))
-
-##### multiple plot Method
-
-ggplot(EC_ROTH, aes(x=timestamp))+
-  geom_line(aes(y=(LE+H)/net.downward.radiative))+
-  scale_y_continuous(limits=c(-10,10))+
-  scale_x_datetime(date_labels = "%Y (%b)") +
-  ggtitle("date_labels = \"%Y (%b)\"") 
-
-####  combined plot
-
-
-
-plot1 <- ggplot(EC_ROTHh, aes(x=timestamp))+
-  geom_line(aes(y=ET))+
-  scale_x_datetime(name=NULL,breaks = NULL,labels = NULL)
-
-plot2 <- ggplot(DWD_ROTH, aes(x=timestamp), group=yday(timestamp))+
-  geom_line(aes(y=precip.no.yes))
-
-plot3 <- ggplot(EC_ROTHh, aes(x=timestamp))+
-  geom_point(aes(y=z0))+
-  scale_x_datetime(name=NULL,breaks = NULL,labels = NULL)
-  
-plot4 <- ggplot(EC_ROTHh, aes(x=timestamp))+
-  geom_line(aes(y=zd))
-
-cowplot::plot_grid(plot1, plot2,plot3,plot4,
-                   align = "v", ncol = 1, rel_heights = c(0.25,0.25,0.25,0.25))
-egg::ggarrange(pplot1,plot2,plot3,plot4,heights = c(0.25, 0.5,0.25,0.25))
-
-
-
-
-
-#####
-ggplot(EC_DWD.ROTH, aes(x = ET, 
-                        y = factor(hour))) +
-  geom_density_ridges(scale = 1) +
-  scale_x_continuous(limits=c(-0.01,0.075))
-  
-ggplot(EC_DWD.ROTH, aes(x = air_temperature.dwd, 
-                        y = factor(hour), height = ..density..)) +
-  geom_density_ridges(stat = "density")
-
-
-
-ggplot(EC_DWD.ROTH, aes(factor(yday(timestamp))))+ #linetype=factor(noise)linetype=factor(year)
-  geom_boxplot(aes(y=air_temperature.dwd)) + 
-  facet_grid(.~factor(year))
-
-ggplot(EC_DWD.ROTH, aes(factor(yday(timestamp))))+ #linetype=factor(noise)linetype=factor(year)
-  geom_boxplot(aes(y=precipitation.dwd)) + 
-  facet_grid(.~factor(year))
-
-ggplot(EC_DWD.ROTH, aes(x=yday(timestamp)))+ #linetype=factor(noise)linetype=factor(year)
-  stat_sum(aes(y=precip.no.yes)) +
-  facet_grid(.~factor(year))
-
-ggplot(EC_DWD.ROTH, aes(x = yday(timestamp), y = precip.no.yes)) +
-  geom_bar(stat="identity") +
-  scale_y_continuous(limits=c(0, 24), breakDs = c(0,2,4,6,8,10,12,14,16,18,20,22,24))+
-  facet_grid(.~factor(year))
-
-
- 
-ggplot(EC_DWD.ROTH, aes(factor(yday(timestamp))))+ #linetype=factor(noise)linetype=factor(year)
-  #geom_boxplot(aes(y=ET)) + 
-  geom_boxplot(aes(y=LE.to.ET(LE.dry.fsd,air_temperature.dwd)*3600), color="blue") + 
-  scale_y_continuous(limits=c(-0.025, 0.075))+
-  facet_grid(.~factor(year))
-
-  labs(title = 'PLSR model performance (R2) per range and percentage of noise - sample size 100', 
-       #subtitle = "range (meters)", 
-       x = "sample design", y = 'Rsquard') +
-  scale_y_continuous(limits=c(0, 1), 
-                     breaks=c(0, 0.10, 0.2, 0.3,
-                              0.4, 0.5, 0.6, 0.7,
-                              0.85, 1)) +
-  scale_fill_manual(values=c("lightgreen", "lightblue" , "yellow"),
-                    name="Sample Design",
-                    breaks=c("Population", "Random", "Systematic"),
-                    labels=c("Population","Random","Systematic")) +
-  scale_color_manual(values=c("grey60", "black"),
-                     name="Spectra Noise",
-                     breaks=c("Spec", "SNoise"),
-                     labels=c("Without","With")) +
-  facet_grid(noise~range,labeller = "label_both")+
-  theme(
-    plot.title=element_text(colour="grey20", vjust = .5, hjust = .5, size = 12, face="bold"),
-    #plot.subtitle=element_text(colour="grey60", hjust = .5, size = 12, face="bold"),
-    strip.text.x = element_text(colour="grey30", size=12, face="bold"),
-    strip.text.y = element_text(colour="grey30", size=12, face="bold"),
-    strip.background = element_rect(fill="grey80"),
-    legend.title = element_text(colour="black", size=12, face="bold"),
-    #legend.margin = unit(0.5, "cm"),
-    legend.text = element_text(colour="grey30", size = 10),
-    legend.position = "bottom",
-    legend.box = "horizontal",
-    axis.text.x = element_text(colour="black", hjust = .5, size = 12),
-    axis.title.x = element_text(colour="grey30", face="bold", size = 12, margin=margin(20,0,0,0)),
-    axis.text.y = element_text(colour="grey25", hjust = .9, size = 8),
-    axis.title.y = element_text(colour="grey30", face="bold", size = 12, margin=margin(0,20,0,0)),
-    panel.background = element_rect(fill = "grey90"),  
-    panel.border = element_blank(), 
-    panel.grid.major = element_line(colour = "white"))
-
-as_tibble(EC_DWD.ROTH) %>% 
-  group_by(year=year(EC_DWD.ROTH$timestamp),
-           DOY=yday(EC_DWD.ROTH$timestamp)) %>%
-  summarise(Ta=mean(air_temperature.dwd, na.rm=T),
-            Ta_EC=mean(air_temperature.dwd, na.rm=T),
-            ETh=mean(ET, na.rm=T),
-            eah=mean(ea, na.rm=T),
-            prec=mean(precipitation, na.rm=T),
-            precS=sum(precip.no.yes, na.rm=T),
-            Rin=mean(radiation.longwave.in.dwd, na.rm=T),
-            Rin_EC=mean(radiation.longwave.in, na.rm=T),
-            .groups='drop') -> plot.yday
-
-plot.yday$precS
-
-ggplot(plot.yday, aes(precS))+ 
-  geom_count() #+ 
-  facet_grid(factor(year)~.)
-
-as_tibble(EC_DWD.ROTH) %>% 
-  group_by(year=year(EC_DWD.ROTH$timestamp),
-           month=month(EC_DWD.ROTH$timestamp, label=TRUE), 
-           day=day(EC_DWD.ROTH$timestamp)) %>%
-  summarise(Ta=mean(air_temperature.dwd, na.rm=T),
-            Ta_EC=mean(air_temperature.dwd, na.rm=T),
-            ETh=mean(ET, na.rm=T),
-            eah=mean(ea, na.rm=T),
-            prec=mean(precipitation, na.rm=T),
-            precS=sum(precip.no.yes, na.rm=T),
-            Rin=mean(radiation.longwave.in.dwd, na.rm=T),
-            Rin_EC=mean(radiation.longwave.in, na.rm=T),
-            .groups='drop') -> plot.hour
-
-
-ggplot(plot.hour, aes(x=day))+
-  geom_line(aes(y=Ta))
-
-timestamp_daily <- EC_DWD.ROTH %>%
-  mutate(
-    year = year(timestamp),
-    yday = yday(timestamp),
-    month = month(timestamp, label = TRUE))
-
-# Plot max_temp by yday for all years
-ggplot(timestamp_daily, aes(x = yday, y = air_temperature.dwd)) +
-  geom_line(aes(group = year), alpha = 0.5)
-
-ggplot(timestamp_daily, aes(x = air_temperature.dwd, y = month, height = ..density..)) +
-  geom_density_ridges(stat = "density")
-
-ggplot(timestamp_daily, aes(x = radiation.shortwave.in.dwd, y = month, height = ..density..)) +
-  geom_density_ridges(stat = "density")
-
-ggplot(timestamp_daily, aes(x = ET, y = month, height = ..density..)) +
-  geom_density_ridges(stat = "density")+
-  scale_x_continuous(limits=c(-0.02,0.05))
-
-ggplot(timestamp_daily, aes(x = LE.dry.fsd, y = factor(year), height = ..density..)) +
-  geom_density_ridges(stat = "density")+
-  scale_x_continuous(limits=c(-25,50))
-
-ggplot(EC_ROTHh, aes(x=timestamp))+
-  geom_line(aes(y=LE.to.ET(LE,air_temperature)*3600))+
-  geom_line(aes(y=LE.to.ET(LE.dry.fsd,air_temperature)*3600), color="blue")+
-  scale_y_continuous(limits=c(-0.1,0.3))
-
-library(reshape)
-
-EC_ROTHh.melted <- cbind.data.frame(c(DWD_ROTH$air_temperature.dwd,
-                                          DWD_ROTH$ea.dwd,
-                                          DWD_ROTH$radiation.shortwave.in.dwd,
-                                          DWD_ROTH$precipitation.dwd),
-                                    c(DWD_ROTH$timestamp,
-                                              DWD_ROTH$timestamp,
-                                              DWD_ROTH$timestamp,
-                                              DWD_ROTH$timestamp),
-                                    c(rep("Ta",length(DWD_ROTH$timestamp)),
-                                          rep("ea",length(DWD_ROTH$timestamp)),
-                                          rep("Rin",length(DWD_ROTH$timestamp)),
-                                          rep("prec.",length(DWD_ROTH$timestamp))))
-
-colnames(EC_ROTHh.melted) <- c("plot1","timestamp","factor")                          
-
-
-ggplot(EC_ROTHh.melted, 
-       mapping = aes(x = timestamp, y = plot1, color = factor)) +
-  geom_line() +
-  facet_grid(rows=vars(factor), scale = "free_y")
-
-ggplot(EC_ROTHh.melted, 
-       mapping = aes(x = timestamp, y = plot1, color = factor)) +
-  geom_linerange() +
-  facet_grid(rows=vars(factor), scale = "free_y")
-
-
-
-
-ggplot(EC_DWD.ROTH, aes(x=yday(timestamp))) +
-  geom_point(aes(y=ET),colour="blue",height = 0.05)+
-  geom_smooth(aes(y=LE.to.ET(LE,air_temperature.dwd)*3600),colour="green") +
-  #geom_smooth(aes(y=LE.to.ET(LE.flag,air_temperature.dwd)*3600),colour="") +
-  geom_smooth(aes(y=LE.to.ET(LE.6sd,air_temperature.dwd)*3600),colour="yellow") +
-  geom_smooth(aes(y=LE.to.ET(LE.dry.fsd,air_temperature.dwd)*3600),colour="blue") +
-  scale_y_continuous(limits=c(-0.1,0.5))+
-  facet_wrap(.~factor(year))
-
-
-nrow(filter(EC_ROTH, year==2019)) # 8760
-summary(filter(EC_ROTH, year==2019)$LE) # 7871
-summary(filter(EC_ROTH, year==2019)$LE.dry.fsd) #4993 # 57%
-
-nrow(filter(EC_TUCC, year==2019)) # 8760
-summary(filter(EC_TUCC, year==2019)$LE) # 8032
-summary(filter(EC_TUCC, year==2019)$LE.dry.fsd) #5104 # 58%
-
-5104/8760 
-
-
-
-
-
-
-
-
-as_tibble(SCOPE_ET_ROTH[[1]]) %>% 
-  group_by(year=year(RO_ET$timestamp),
-           month=month(RO_ET$timestamp, label=TRUE), 
-           hour=hour(RO_ET$timestamp)) %>%
-  summarise(ET.obsC.avg=mean(ET.obsC, na.rm=T),
-            ET.obsO.avg=mean(ET.obsO, na.rm=T),
-            ETo.avg=mean(ETo, na.rm=T),
-            ETo_adj1.avg=mean(ETo_adj1, na.rm=T),
-            SCOPE_ETo.avg=mean(SCOPE_ETo, na.rm=T),
-            SCOPE_ETo_adj1.avg=mean(SCOPE_ETo_adj1, na.rm=T),
-            SCOPE_ETo_adj2.avg=mean(SCOPE_ETo_adj2, na.rm=T),
-            SCOPE_Tcor_BGLAI.avg=mean(SCOPE_Tcor_BGLAI, na.rm=T),
-            SCOPE_Tcor_BGLAI_adj1.avg=mean(SCOPE_Tcor_BGLAI_adj1, na.rm=T),
-            SCOPE_Tcor_BGLAI_adj2.avg=mean(SCOPE_Tcor_BGLAI_adj2, na.rm=T),
-            SCOPE_2.avg=mean(SCOPE_ETo, na.rm=T),
-            SCOPE_2_adj1.avg=mean(SCOPE_2_adj1, na.rm=T),
-            SCOPE_2_adj2.avg=mean(SCOPE_2_adj2, na.rm=T),
-            .groups='drop') -> RO_ETh
-
-
-library(nlme)
-round(summary(lmList(ETo_adj1~ET.obsC|month, RO_ETC))$r.squared,2)
-#[1-12] 0.54 0.60 0.58 0.68 0.82 0.83 0.80 0.78 0.79 0.71 0.51 0.53
-round(summary(lmList(SCOPE_ETo_adj2~ET.obsC|month, RO_ETC))$r.squared,2)
-#[1-12] 0.49 0.52 0.59 0.70 0.84 0.81 0.76 0.72 0.71 0.65 0.47 0.47
-#                   *    *    *                           
-
-#residual standard error estimates for the individual
-round(summary(lmList(ETo_adj1~ET.obsC|month, RO_ETC))$sigma,3)
-#[1-12] 0.009 0.019 0.032 0.048 0.035 0.047 0.048 0.047 0.035 0.024 0.012 0.008
-round(summary(lmList(SCOPE_ETo_adj2~ET.obsC|month, RO_ETC))$sigma,3)
-#[1-12] 0.006 0.011 0.016 0.027 0.021 0.039 0.043 0.042 0.030 0.017 0.007 0.005
-#         *      *    *      *    *     *     *     *     *      *    *     *
-
-
-as_tibble(RO_ET) %>% 
-  group_by(year=year(RO_ET$timestamp),
-           month=month(RO_ET$timestamp, label=TRUE), 
-           hour=hour(RO_ET$timestamp)) %>%
-  summarise(ET.obsC.avg=mean(ET.obsC, na.rm=T),
-            ET.obsO.avg=mean(ET.obsO, na.rm=T),
-            ETo.avg=mean(ETo, na.rm=T),
-            ETo_adj1.avg=mean(ETo_adj1, na.rm=T),
-            SCOPE_ETo.avg=mean(SCOPE_ETo, na.rm=T),
-            SCOPE_ETo_adj1.avg=mean(SCOPE_ETo_adj1, na.rm=T),
-            SCOPE_ETo_adj2.avg=mean(SCOPE_ETo_adj2, na.rm=T),
-            SCOPE_Tcor_BGLAI.avg=mean(SCOPE_Tcor_BGLAI, na.rm=T),
-            SCOPE_Tcor_BGLAI_adj1.avg=mean(SCOPE_Tcor_BGLAI_adj1, na.rm=T),
-            SCOPE_Tcor_BGLAI_adj2.avg=mean(SCOPE_Tcor_BGLAI_adj2, na.rm=T),
-            SCOPE_2.avg=mean(SCOPE_ETo, na.rm=T),
-            SCOPE_2_adj1.avg=mean(SCOPE_2_adj1, na.rm=T),
-            SCOPE_2_adj2.avg=mean(SCOPE_2_adj2, na.rm=T),
-            .groups='drop') -> RO_ETh
-
-plothour <- ggplot(filter(RO_ETh, year==2019), aes(x=hour)) +
-  #geom_line(aes(y=ET.obsO.avg, colour="ET.orig"),size=.5) +
-  #geom_line(aes(y=ETo.avg, colour="ETo.orig"),size=.5) +
-  geom_line(aes(y=ETo_adj1.avg, colour="ETo.adj1"),size=.75) +
-  geom_line(aes(y=SCOPE_Tcor_BGLAI_adj2.avg, colour="SCOPE1.adj2"),size=.75) + 
-  geom_line(aes(y=SCOPE_2_adj2.avg, colour="SCOPE2.adj2"),size=.75) +
-  geom_line(aes(y=SCOPE_ETo_adj2.avg, colour="SCOPE_ETO.adj2"),size=.75) +
-  geom_line(aes(y=ET.obsC.avg, colour="ET.dry.fsd"),size=1.2) +
-  scale_y_continuous(limits=c(-0.01,0.29), breaks=c(0,0.05,0.1,0.15,0.2,0.25,0.3)) +
-  scale_x_discrete(breaks=c(0,4,8,12,16,20,24)) +
-  labs(x="month (year)", y='ET(mm/h)') +
-  scale_color_manual(name = "data cleaning", 
-                     values = c("ET.orig"="orange",
-                                "ET.dry.fsd"="black", 
-                                "ETo.orig"="blue",
-                                "ETo.adj1"="orange",               
-                                "SCOPE1.adj2"="lightgreen",
-                                "SCOPE2.adj2"="green",
-                                "SCOPE_ETO.adj2"="darkgreen"))+
-  labs(x = "hour (month average)", y = 'ET (mm/h)') +
-  facet_wrap(.~factor(month), ncol=12)+
-  theme(legend.position = "bottom",
-        axis.text.y = element_text(color="grey25", hjust=.9, size=9),
-        axis.title.y = element_text(color = "grey25", 
-                                    face="bold",size=10,vjust=1.2),
+        axis.title.y=element_text(color="grey25",face="bold",size=11,vjust=1.2),
+        axis.text.x = element_text(color="grey25", size=10),
+        axis.title.x=element_text(color="grey25",face="bold",size=11,vjust=1.2),
         strip.background = element_blank(),
         strip.text.x = element_blank(),
-        panel.spacing=unit(0, "lines"), 
-        panel.grid.major = element_line(colour="white"),
-        panel.grid.minor = element_line(colour="grey90"))
-
-as_tibble(DWD_ROTH) %>% 
-  group_by(year=year(DWD_ROTH$timestamp),
-           month=month(DWD_ROTH$timestamp, label=TRUE), 
-           hour=hour(DWD_ROTH$timestamp)) %>%
-  summarise(prec_mm.avg=mean(precipitation.dwd, na.rm=T),
-            prec_mm.sum=sum(precipitation.dwd, na.rm=T),
-            prec_h.sum=sum(precip.no.yes, na.rm=T),
-            .groups='drop') -> prec.hour
-
-
-plotprec <- ggplot(filter(prec.hour, year==2019), aes(x=hour)) +
-  #geom_line(aes(y=prec_mm.avg, colour="prec_mm.avg"),size=.75) +
-  geom_line(aes(y=prec_mm.sum, colour="blue"),size=.75) +
-  geom_line(aes(y=prec_h.sum, colour="darkblue"),size=.75) +
-  scale_y_continuous(name = "precipitation (mm)", 
-                     limits = c(0,24),
-                     breaks=c(0,4,8,12,16,20,24),
-                     sec.axis = dup_axis(name = "hours per day",
-                                         breaks=c(0,4,8,12,16,20,24),
-                                         labels=c(0,4,8,12,16,20,24))) +
-  scale_x_discrete(name=NULL,limits=NULL, breaks = NULL) +
-  scale_color_manual(name=NULL,labels=NULL,breaks =NULL,
-                     values=c("blue","darkblue"))+             
-  facet_wrap(.~factor(month), ncol=12)+
-  theme(legend.position = "bottom",
-        panel.spacing=unit(0, "lines"),
-        strip.text.x = element_text(colour="grey30", size=10, face="bold"),
-        strip.text.y = element_text(colour="grey30", size=10, face="bold"),
-        strip.background = element_rect(fill="grey80"),
-        axis.text.y = element_text(color="blue", hjust=.9, size=9),
-        axis.title.y = element_text(color = "blue", 
-                                    face="bold",size=8,vjust=1.2),
-        axis.title.y.right = element_text(color="darkblue", 
-                                          face="bold",hjust=0.7,size=9,vjust=1.4),
-        axis.text.y.right = element_text(color="darkblue", hjust=.9, size=8),
-        panel.background = element_rect(fill = "grey90"),  
+        panel.spacing.y = unit(-0.5, "lines"), 
+        panel.spacing.x = unit(0.075, "lines"), 
+        panel.background = element_rect(fill = "white"),  
         panel.border = element_blank(), 
         panel.grid.major = element_line(colour="white"),
-        panel.grid.minor = element_line(colour="grey90"))
+        panel.grid.minor = element_line(colour="white"),
+        plot.title = element_text(size=9, vjust=-1,hjust=0))
 
-egg::ggarrange(plotprec,plothour,
-               heights = c(0.30,0.70))
+legend <- cowplot::get_legend(legend_ET)
 
+grid::grid.newpage()
+grid::grid.draw(legend)
 
-ggplot(RO_ET,aes(x=date(timestamp)))+
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC, color="ET", fill="ET"),size=1) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ETo_adj1, color="ETo.adj1", fill="ETo.adj1"))+
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=SCOPE_ETo_adj2, color="SCOPE_ETo", fill="SCOPE_ETo")) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=SCOPE_1_adj2, color="SCOPE_1", fill="SCOPE_1")) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=SCOPE_2_adj2, color="SCOPE_2", fill="SCOPE_2")) +
-  scale_color_manual(name = "ROTH", 
-                     values = c("ET"="black",
-                                "ETo.adj1"="orange", 
-                                "SCOPE_ETo"="lightgreen",
-                                "SCOPE_1"="green", 
-                                "SCOPE_2"="darkgreen", 
-                                "SCOPE_3"="brown"),                
-                     aesthetics = c("color", "fill"))+
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"), expand = F, #"2018-07-01", "2020-03-31"
-               ylim = c(0, 0.15))+
-  scale_y_continuous(breaks=c(0,0.05,0.10,0.15,0.20))+
-  scale_x_date(date_labels = "%b %y",date_breaks = "month", breaks = pretty_breaks(),
-               expand = c(0, 0)) + #
-  labs(x="month (year)", y='ET(mm/h)') +
-  theme(
-    strip.text.x = element_text(colour="grey30", size=8, face="bold"),
-    strip.text.y = element_text(colour="grey30", size=8, face="bold"),
-    axis.text.x = element_text(colour="grey30", hjust = .5, size = 8, angle = 90),
-    axis.title.x = element_text(colour="grey30", face="bold", size = 8, margin=margin(20,0,0,0)),
-    axis.text.y = element_text(colour="grey25", hjust = .9, size = 8),
-    axis.title.y = element_text(colour="grey30", face="bold", size = 8, margin=margin(0,20,0,0)),
-    legend.position = "bottom",
-    panel.grid.major = element_line(colour = "white"))
+ggdraw(plot_grid(
+  plot_grid(Plot_TUCC_ET, Plot_TUCC_ET.fill, Plot_TUCC_ETo, 
+            Plot_TUCC_ETo, Plot_TUCC_SCOPE.DWD, Plot_TUCC_SCOPE.RS,
+            align="v",ncol=2, rel_heights=c(0.33,0.32,0.35,0.33,0.32,0.35), 
+            labels = c("a)","b)","c)","d)","e)","f)"), label_size = 12),
+  plot_grid(NULL, legend, ncol=2, rel_widths=c(0.05,0.95)), 
+  nrow=2, rel_heights=c(0.90,0.1)))
 
-
-plot_errorRO <- ggplot(RO_ETC,aes(x=date(timestamp)))+
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC-ETo_adj1,color="ETo.adj1",fill="ETo.adj1")) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC-SCOPE_ETo_adj2,color="SCOPE_ETo_adj2",fill="SCOPE_ETo_adj2")) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC-SCOPE_Tcor_BGLAI_adj2,color="SCOPE_1_adj2",fill="SCOPE_1_adj2"))+
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC-SCOPE_2_adj2,color="SCOPE_2_adj2",fill="SCOPE_2_adj2")) +
-  stat_smooth(formula=y~splines::bs(x,30),aes(y=ET.obsC-SCOPET_adj2,color="SCOPE_3_adj2",fill="SCOPE_3_adj2")) +
-  geom_hline(yintercept=0, color="red", linetype="dotted")+
-  scale_color_manual(name = "Model error", 
-                     values = c("ETo.adj1"="orange", 
-                                "SCOPE_ETo_adj2"="lightgreen",
-                                "SCOPE_1_adj2"="green", 
-                                "SCOPE_2_adj2"="darkgreen",
-                                "SCOPE_3_adj2"="brown"),                
-                     aesthetics = c("color", "fill"))+
-  coord_x_date(xlim = c("2018-07-01", "2020-03-31"), expand = F, #"2019-01-01","2020-12-31"
-               ylim = c(-0.05, 0.05))+
-  scale_x_date(date_labels = "%b %y",date_breaks = "month", breaks = pretty_breaks(),
-               expand = c(0, 0)) + #
-  labs(x = "month (year)", y = 'Error / ET.pred - ET.obs (mm/h)') +
-  theme(
-    strip.text.x = element_text(colour="grey30", size=7, face="bold"),
-    strip.text.y = element_text(colour="grey30", size=7, face="bold"),
-    axis.text.x = element_text(colour="grey30", hjust = .5, size = 7, angle = 90),
-    axis.title.x = element_text(colour="grey30", face="bold", size = 7, margin=margin(20,0,0,0)),
-    axis.text.y = element_text(colour="grey25", hjust = .9, size = 7),
-    axis.title.y = element_text(colour="grey30", face="bold", size = 7, margin=margin(0,20,0,0)),
-    legend.position = "bottom",
-    panel.grid.major = element_line(colour = "white"))
-
-egg::ggarrange(plotprec,plot_errorRO,
-               heights = c(0.30,0.70))
-
-egg::ggarrange(plot1b,plot_errorRO,
-               heights = c(0.30,0.70))
-
-egg::ggarrange(plot3b,plot_errorRO,
-               heights = c(0.30,0.70))
-
-egg::ggarrange(plot4b,plot_errorRO,
-               heights = c(0.30,0.70))
-
-ggplot(RO_ETC,aes(x=date(timestamp)))+
-  geom_line(aes(y=ET.obsC-ETo_adj1,color="ETo.adj1",fill="ETo.adj1")) +
-  geom_line(aes(y=ET.obsC-SCOPE_ETo_adj2,color="SCOPE_ETo_adj2",fill="SCOPE_ETo_adj2")) +
-  geom_line(aes(y=ET.obsC-SCOPE_Tcor_BGLAI_adj2,color="SCOPE_1_adj2",fill="SCOPE_1_adj2"))+
-  geom_line(aes(y=ET.obsC-SCOPE_2_adj2,color="SCOPE_2_adj2",fill="SCOPE_2_adj2")) +
-  geom_hline(yintercept=0, color="red", linetype="dotted")+
-  scale_color_manual(name = "Model error", 
-                     values = c("ETo.adj1"="orange", 
-                                "SCOPE_ETo_adj2"="lightgreen",
-                                "SCOPE_1_adj2"="green", 
-                                "SCOPE_2_adj2"="darkgreen"),                
-                     aesthetics = c("color", "fill"))+
-  coord_x_date(xlim = c("2018-07-01", "2020-03-31"), #"2018-07-01", "2020-03-31"
-               ylim = c(-0.3, 0.3))+
-  scale_x_date(date_labels = "%b (%Y)", date_breaks = "month") +
-  labs(x = "month (year)", y = 'Error / ET.pred - ET.obs (mm/h)') +
-  theme(
-    strip.text.x = element_text(colour="grey30", size=7, face="bold"),
-    strip.text.y = element_text(colour="grey30", size=7, face="bold"),
-    axis.text.x = element_text(colour="grey30", hjust = .5, size = 7, angle = 90),
-    axis.title.x = element_text(colour="grey30", face="bold", size = 7, margin=margin(20,0,0,0)),
-    axis.text.y = element_text(colour="grey25", hjust = .9, size = 7),
-    axis.title.y = element_text(colour="grey30", face="bold", size = 7, margin=margin(0,20,0,0)),
-    legend.position = "bottom",
-    panel.grid.major = element_line(colour = "white"))
-
-
-
-
-as_tibble(RO_ET) %>% 
-  group_by(year=year(TU_ET$timestamp),
-           month=month(TU_ET$timestamp)) %>%
-  summarise(ETo=sum(ETo, na.rm=T),
-            ETo_adj1=sum(ETo_adj1, na.rm=T),
-            SCOPE_ETo=sum(SCOPE_ETo, na.rm=T),
-            SCOPE_ETo_adj1=sum(SCOPE_ETo_adj1, na.rm=T),
-            SCOPE_ETo_adj2=sum(SCOPE_ETo_adj2, na.rm=T),
-            SCOPE_1=sum(SCOPE_1, na.rm=T),
-            SCOPE_1_adj1=sum(SCOPE_1_adj1, na.rm=T),
-            SCOPE_1_adj2=sum(SCOPE_1_adj2, na.rm=T),
-            SCOPE_2=sum(SCOPE_2, na.rm=T),
-            SCOPE_2_adj1=sum(SCOPE_2_adj1, na.rm=T),
-            SCOPE_2_adj2=sum(SCOPE_2_adj2, na.rm=T),
-            .groups='drop') -> RO_ET_M
-
-t(as_tibble(RO_ET) %>% 
-    group_by(year=year(TU_ET$timestamp)) %>%
-    summarise(ETo=sum(ETo, na.rm=T),
-              ETo_adj1=sum(ETo_adj1, na.rm=T),
-              SCOPE_ETo=sum(SCOPE_ETo, na.rm=T),
-              SCOPE_ETo_adj1=sum(SCOPE_ETo_adj1, na.rm=T),
-              SCOPE_ETo_adj2=sum(SCOPE_ETo_adj2, na.rm=T),
-              SCOPE_1=sum(SCOPE_1, na.rm=T),
-              SCOPE_1_adj1=sum(SCOPE_1_adj1, na.rm=T),
-              SCOPE_1_adj2=sum(SCOPE_1_adj2, na.rm=T),
-              SCOPE_2=sum(SCOPE_2, na.rm=T),
-              SCOPE_2_adj1=sum(SCOPE_2_adj1, na.rm=T),
-              SCOPE_2_adj2=sum(SCOPE_2_adj2, na.rm=T),
-              .groups='drop') )
-
-t(round(filter(RO_ET_M, year==2019)[,3:13],1))
-
-ggplot(filter(RO_ET_M, year==2019), aes(x=month))+
-  geom_line(aes(y=ETo_adj1),color="orange")+
-  geom_line(aes(y=SCOPE_ETo),color="pink") +
-  geom_line(aes(y=SCOPE_ETo_adj1),color="red") +
-  geom_line(aes(y=SCOPE_ETo_adj2),color="darkred")+
-  geom_line(aes(y=SCOPE_1),color="cyan") +
-  geom_line(aes(y=SCOPE_1_adj1),color="blue") +
-  geom_line(aes(y=SCOPE_1_adj2),color="darkblue")+
-  geom_line(aes(y=SCOPE_2),color="yellow") +
-  geom_line(aes(y=SCOPE_2_adj1),color="green") +
-  geom_line(aes(y=SCOPE_2_adj2),color="darkgreen")+
-  labs(y = 'ET(mm)',x="month average (2019)")
-###########################################################################
-############################################################################
 ##########################################################################
-#PlotLAI
+# some statistics
+# missing data
 summary(filter(plotVARs,year(timestamp)==2019))
-0.048/0.024
+nrow(filter(plotVARs,year(timestamp)==2019))
+3767/8760 # NAs ETc.ROTH cleaned
+3685/8760 # NAs ETc.TUCC cleaned
+889/8760 # NAs ET.ROTH
+698/8760 # NAs ET.TUCC
 
-plot.Cover <- ggplot(filter(plotVARs,year(timestamp)==2019), aes(x=yday(timestamp))) +
-  geom_smooth(formula=y~splines::bs(x,20),aes(y=veg.cover.ROTH), colour="darkgreen")+
-  geom_smooth(formula=y~splines::bs(x,20),aes(y=impervious.ROTH), colour="green")+
-  geom_smooth(formula=y~splines::bs(x,20),aes(y=veg.cover.TUCC), colour="darkblue")+
-  geom_smooth(formula=y~splines::bs(x,20),aes(y=impervious.TUCC), colour="blue")+
-  scale_x_discrete(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'Fraction (%)') +
-  theme(axis.text.y = element_text(colour="grey25", size=7),
-        axis.title.y = element_text(colour="grey30", vjust=-4.5, 
-                                    face="bold",size=7, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
+# annually precipitation
+round(sum(filter(plotVARs,year(timestamp)==2019)$ETo.DWD.ROTH.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH),2)*100
+#95%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.ETo.ROTH.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH),2)*100
+#63%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.DWD.ROTH.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH),2)*100
+#62%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.RS.ROTH.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH),2)*100
+#65%
+## gap-filling
+round(sum(filter(plotVARs,year(timestamp)==2019 & ET.ROTH.filled>=0)$ET.ROTH.filled)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.ROTH),2)*100
+#66%
+round(sum(filter(plotVARs,year(timestamp)==2019)$ETo.DWD.TUCC.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC),2)*100
+#59%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.ETo.TUCC.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC),2)*100
+#37%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.DWD.TUCC.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC),2)*100
+#37%
+round(sum(filter(plotVARs,year(timestamp)==2019)$SCOPE.RS.TUCC.adj)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC),2)*100
+#38%
+## gap-filling
+round(sum(filter(plotVARs,year(timestamp)==2019 & ET.TUCC.filled>=0)$ET.TUCC.filled)/
+        sum(filter(plotVARs,year(timestamp)==2019)$Precmm.TUCC),2)*100
+#47%
 
-#Plot results
-summary(ETo$ETo.DWD.ROTH)
-summary(EC_ROTH$veg.cover)
-summary(plotVARs$ETo.DWD.ROTH.adj)
+plotVARs$month <- month(plotVARs$timestamp)
+plotVARs$year <- year(plotVARs$timestamp)
 
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$ETo.DWD.ROTH.adj, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.ETo.ROTH.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.DWD.ROTH.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.RS.ROTH.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$Precmm.ROTH, na.rm=T),2))
+#          1    2     3     4     5     6     7     8     9     10    11    12
+#[ETo]   5.48 14.22 21.15 53.32 53.19 87.53 67.22 63.66 36.59 18.04  5.69  5.83
+#[SCOPE] 5.06 10.15 14.24 34.01 36.94 67.17 50.97 47.27 26.34 13.34  5.02  5.22
+#[prec] 48.00 18.80 61.80  6.00 39.50 75.10 54.90 28.20 55.25 55.10 34.90 28.90
 
-# plot preciptation hours / yes or no
-plotPrec24Bar <- ggplot(plotVARs, aes(x=date(timestamp))) +
-  geom_bar(stat="identity", colour="darkblue", aes(y=PrecYN.TUCC)) +
-  geom_bar(stat="identity", colour="darkgreen", aes(y=PrecYN.ROTH)) +
-  scale_y_continuous(limits=c(0, 24), breaks = c(0,6,12,18,24))+
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"), expand = F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'precipitation (h)') +
-  theme(axis.text.y = element_text(colour="grey25", size=9),
-        axis.title.y = element_text(colour="grey30", face="bold", vjust=-3.5, size=10, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$ETo.DWD.TUCC.adj, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.ETo.TUCC.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.DWD.TUCC.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$SCOPE.RS.TUCC.adjB, na.rm=T),2))
+sapply(1:12, FUN = function(i) round(sum(filter(plotVARs, month==i 
+                                                & year==2019)$Precmm.TUCC, na.rm=T),2))
+#          1    2     3     4     5     6     7     8     9     10    11    12
+#[ETo]   3.33  6.75  9.86 38.55 29.14 48.76 27.95 31.76 17.16 10.30  4.20  3.61
+#[SCOPE] 2.70  5.28  6.42 24.75 19.18 35.32 22.98 23.89 12.42  7.20  2.91  2.51
+#[prec] 40.80 21.40 62.10  7.50 39.50 26.10 25.20 10.30 55.20 47.80 37.85 27.20
 
-# Plot precipitation(mm)
-mean(filter(plotVARs, year(timestamp)==2019)$Precmm.ROTH)
-mean(filter(plotVARs, year(timestamp)==2019)$Precmm.TUCC)
-
-plotprecSmoo <- ggplot(plotVARs, aes(x=date(timestamp))) +
-  geom_smooth(formula=y~splines::bs(x,30),color="darkgreen",fill="darkgreen", aes(y=Precmm.ROTH)) +
-  geom_smooth(formula=y~splines::bs(x,30),color="darkblue",fill="darkblue", aes(y=Precmm.TUCC)) +
-  geom_hline(yintercept=0.0578  ,color="darkgreen", linetype="dotted")+
-  geom_hline(yintercept=0.0458  ,color="darkblue", linetype="dotted")+
-  scale_y_continuous(breaks = c(0,0.04,0.08,0.12,0.16,0.20))+
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"),ylim = c(-0.05,0.17), expand = F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'precipitation(mm)') +
-  theme(axis.text.y = element_text(colour="grey25", size=9),
-        axis.title.y = element_text(colour="grey30", vjust =-8, face="bold", size=10, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
-
-plotmmRO <- ggplot(plotVARs, aes(x=date(timestamp))) +
-  geom_smooth(formula = y ~ splines::bs(x,24),color="darkgreen",fill="darkgreen", aes(y=Precmm.ROTH)) +
-  #  geom_smooth(formula = y ~ splines::bs(x,24),color="darkblue",fill="darkblue", aes(y=Precmm.TUCC)) +
-  scale_y_continuous(breaks = c(0,0.04,0.08,0.12,0.16,0.20))+
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"),ylim = c(-0.05,0.16), expand = F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'precipitation(mm)') +
-  theme(axis.text.y = element_text(colour="grey25", size=9),
-        axis.title.y = element_text(colour="grey30", vjust =-8, face="bold", size=7, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
-
-plotmmTU <- ggplot(plotVARs, aes(x=date(timestamp))) +
-  #geom_smooth(formula = y ~ splines::bs(x,24),color="darkgreen",fill="darkgreen", aes(y=Precmm.ROTH)) +
-  geom_smooth(formula = y ~ splines::bs(x,24),color="darkblue",fill="darkblue", aes(y=Precmm.TUCC)) +
-  scale_y_continuous(breaks = c(0,0.04,0.08,0.12,0.16,0.20))+
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"),ylim = c(-0.05,0.16), expand = F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'precipitation(mm)') +
-  theme(axis.text.y = element_text(colour="grey25", size=7),
-        axis.title.y = element_text(colour="grey30", vjust =-8, face="bold", size=7, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
-
-# plot Rin
-plot2 <- ggplot(plotVARs, aes(x = date(timestamp))) +
-  geom_line(stat="identity",color="black",aes(y=Rin.TUCC)) +
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"), expand=F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y ='Rin (W m-2)') +
-  theme(axis.text.y = element_text(colour="grey25", size=9),
-        axis.title.y = element_text(colour="grey30", vjust=-7,face="bold", size=10, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
-
-# plot Ta general
-plot1 <- ggplot(plotVARs, aes(x=date(timestamp))) +
-  geom_smooth(formula = y ~ splines::bs(x,24),color="darkblue", aes(y=Ta.TUCC)) +
-  geom_smooth(formula = y ~ splines::bs(x,24),color="darkgreen", aes(y=Ta.ROTH)) +
-  coord_x_date(xlim = c("2019-01-01","2019-12-31"), expand=F)+
-  scale_x_date(name=NULL,limits=NULL, breaks = NULL) +
-  labs(y = 'Ta(ºC)') +
-  theme(axis.text.y = element_text(colour="grey25", size=9),
-        axis.title.y = element_text(colour="grey30", vjust=-4.5, face="bold",size=10, margin=margin(0,20,0,0)),
-        panel.grid.major = element_line(colour = "white"))
-
-
-#plot ET SCOPE ROTH 
-ggplot(filter(plotVARs, year(timestamp)==2019), aes(x=ETc.ROTH)) +
-  geom_point(aes(y=SCOPE.ETo.ROTH, color= "SCOPE.ETo")) + 
-  geom_point(aes(y=SCOPE.ETo.ROTH.adj1, color= "SCOPE.ETo.adj1")) + 
-  geom_point(aes(y=SCOPE.ETo.ROTH.adj2, color= "SCOPE.ETo.adj2")) + 
-  geom_abline(intercept=0, slope=1, color="red", linetype="dotted") +
-  scale_y_continuous(limits=c(0,0.6)) +
-  scale_x_continuous(limits=c(0,0.6)) + 
-  ggtitle("b) ETo (uncorrected) vs ET observed") +
-  labs(x = 'Observed ET [mm/h] (EC tower)', 
-       y = 'Modelled ET [mm/h] (SCOPE)')+
-  theme(axis.title.x= element_text(size = 10),
-        axis.title.y= element_text(size = 10),
-        axis.text.x = element_text(hjust = .9, angle = 90, size = 10),
-        axis.text.y = element_text(hjust = .9, size = 10),
-        strip.text.x = element_text(size=8, face="bold"),
-        strip.text.y = element_text(size=8, face="bold"),
-        legend.position = "bottom",
-        legend.text = element_text(colour="black", size = 12),
-        legend.title = element_text(colour="black", size=10, face="bold"))
-
-plotprecmm <- ggplot(filter(Mean_h_results_ET, year==2019), aes(x=hour)) +
-  geom_line(aes(y=precmm_ROTH, colour="precmm.ROTH"),size=.5) +
-  geom_line(aes(y=precmm_TUCC, colour="precmm.TUCC"),size=.5) +
-  scale_y_sqrt(name = "precipitation (mm)", limits=c(0,42), 
-               breaks = c(0,1,5,10,20,35))+
-  scale_x_discrete(name=NULL,limits=NULL, breaks = NULL) +
-  scale_color_manual(name=NULL,labels=NULL,breaks =NULL,
-                     values = c("precmm.ROTH"="green","precmm.TUCC"="blue"))+             
-  facet_wrap(.~factor(month), ncol=12)+
-  theme(legend.position = "bottom",
-        panel.spacing=unit(0.075, "lines"),
-        strip.background = element_rect(fill="grey80"),
-        axis.text.y = element_text(color="grey20", hjust=.9, size=9),
-        axis.title.y = element_text(color = "grey20", face="bold",size=8,vjust=1.2),
-        panel.background = element_rect(fill = "grey90"),  
-        panel.border = element_blank(), 
-        panel.grid.major = element_line(colour="grey90"),
-        panel.grid.minor = element_line(colour="grey90"),
-        plot.title = element_text(size=9, vjust=-1,hjust=0, face="bold"))
+#####################################################################
+#####################################################################

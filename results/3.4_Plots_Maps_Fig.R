@@ -428,10 +428,10 @@ scatt3 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-# plot SCOPE.ETo
+
 scatt4 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
-  geom_point(aes(x=ETc.ROTH0,y=SCOPE.ETo.ROTH.adj), color= "green", alpha = 0.1) + 
-  geom_point(aes(x=ETc.TUCC0,y=SCOPE.ETo.TUCC.adj), color= "blue", alpha = 0.1) +   
+  geom_point(aes(x=ETc.ROTH0,y=SCOPE.ETo.ROTH.adjB), color= "green", alpha = 0.1) + 
+  geom_point(aes(x=ETc.TUCC0,y=SCOPE.ETo.TUCC.adjB), color= "blue", alpha = 0.1) +   
   geom_abline(intercept=0, slope=1, color="red", linetype="dotted") +
   scale_y_continuous(limits=c(0,0.4)) +
   scale_x_continuous(limits=c(0,0.4)) + 
@@ -444,10 +444,10 @@ scatt4 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-# plot SCOPE.DWD
+
 scatt5 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
-  geom_point(aes(x=ETc.ROTH0,y=SCOPE.DWD.ROTH.adj), color= "green", alpha = 0.1) + 
-  geom_point(aes(x=ETc.TUCC0,y=SCOPE.DWD.TUCC.adj), color= "blue", alpha = 0.1) +   
+  geom_point(aes(x=ETc.ROTH0,y=SCOPE.DWD.ROTH.adjB), color= "green", alpha = 0.1) + 
+  geom_point(aes(x=ETc.TUCC0,y=SCOPE.DWD.TUCC.adjB), color= "blue", alpha = 0.1) +   
   geom_abline(intercept=0, slope=1, color="red", linetype="dotted") +
   scale_y_continuous(limits=c(0,0.4)) +
   scale_x_continuous(limits=c(0,0.4)) + 
@@ -460,10 +460,11 @@ scatt5 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-### plot SCOPE RS
+
+### plot ETo adj
 scatt6 <- ggplot(filter(plotVARs, year(timestamp)==2019)) + 
-  geom_point(aes(x=ETc.ROTH0,y=SCOPE.RS.ROTH.adj), color= "green", alpha = 0.1) + 
-  geom_point(aes(x=ETc.TUCC0,y=SCOPE.RS.TUCC.adj), color= "blue", alpha = 0.1) + 
+  geom_point(aes(x=ETc.ROTH0,y=SCOPE.RS.ROTH.adjB), color= "green", alpha = 0.1) + 
+  geom_point(aes(x=ETc.TUCC0,y=SCOPE.RS.TUCC.adjB), color= "blue", alpha = 0.1) + 
   geom_abline(intercept=0, slope=1, color="red", linetype="dotted") +
   scale_y_continuous(limits=c(0,0.4)) +
   scale_x_continuous(limits=c(0,0.4)) + 
@@ -476,13 +477,13 @@ scatt6 <- ggplot(filter(plotVARs, year(timestamp)==2019)) +
         strip.text.x = element_text(size=8, face="bold"),
         strip.text.y = element_text(size=8, face="bold"),
         plot.title = element_text(size=9, vjust=-1,hjust=0.08, face="bold"))
-# combine in a grid
-plot_grid(scatt1,scatt2,scatt1,scatt1,scatt1,scatt1, align="v",ncol=3,
-          #rel_heights=c(0.15,0.15,0.15,0.15,0.4), 
-          #hjust=c(-6.5,-6.5,-7,-6.5,-6.5), vjust=1.6,
-          labels = c("a)","b)","c)","d)","e)","f)"), #labels="auto",
-          label_size = 10)
 
+# combine all 6 plots
+plot_grid(scatt1,scatt2,scatt3,scatt4,scatt5,scatt6, align="v",ncol=3,
+          #rel_heights=c(0.15,0.15,0.15,0.15,0.4), 
+          vjust=c(1.2,1.2,1.2,-.2,-.2,-.2), #hjust=1.6,
+          labels = c("a)","b)","c)","d)","e)","f)"), #labels="auto",
+          label_size = 12)
 ##########################################################################
 # Figure #4 - 4 24 hours plots combined
 ##########################################################################

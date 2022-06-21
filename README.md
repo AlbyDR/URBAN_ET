@@ -9,25 +9,27 @@ This page aims to share R codes to model urban ET using the Soil-Canopy-Observat
 
 **1- Model inputs collection and preprocessing (R)**
 
-   1.1 Meteorological station data (DWD - German Climate Data Center)
-   
-   1.2 LAI derived Remote Sensing Data (Copernicus)
-   
-   1.3 Vegetation height and vegetation fraction (Berlin Environmental Atlas)
-   
-   1.4 SCOPE input parameters preparetion (pixel timeseries)
-   
-   1.5 Eddy Covariance data cleaning and footprints for validation (TUB UCO)
+      1.1 Meteorological station data (DWD - German Climate Data Center)
+
+      1.2 LAI derived Remote Sensing Data (Copernicus)
+
+      1.3 Vegetation height and vegetation fraction (Berlin Environmental Atlas)
+
+      1.4 SCOPE input parameters preparetion (pixel timeseries)
+
+      1.5 Eddy Covariance data cleaning and footprints for validation (TUB UCO)
  
    
    
 **2- Modelling (Matlab through R)**
 
-   2.1 Original code (link)
-   
-   2.2 Iniciation code (.m) and set parameters file
-   
-   2.3 Input files (filenames_, input_data_, and setoptions_)
+      2.1 Setting and SCOPE input files especification  
+
+      2.2 Run SCOPE
+
+      2.3 Getting the prediction
+      
+      2.4 Correct the prediction to urban environment
    
    
    

@@ -4,7 +4,7 @@ library(sf)
 library(tidyverse)
 library(lubridate)
 
-**Metadata**
+## Metadata 
 #################################################################################################
 # Meteorological variables from DWD ftp server
 #################################################################################################
@@ -18,14 +18,13 @@ library(lubridate)
 # Sys.setenv(TZ='UTC')
 ##################################################################################################
 
-## **Dataset 1** #################################################################################
+## Dataset 1 #################################################################################
 # meteo_var = **air_temperature** 
 # var_name = TT_TU, air temperature at 2m height (Ta)
 # var_name = RF_TU, relative humidity at 2m height (RH)
 ##################################################################################################
 
-## **Variable 1
-- **air_temperature**
+## Variable 1 - air_temperature
 Air_temp <- get_DWDdata(
   lat_center = 52.4537, # Berlin cordinates
   lon_center = 13.3017, 

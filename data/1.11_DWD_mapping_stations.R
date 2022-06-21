@@ -1,119 +1,446 @@
-################################################################################
-library(readr)     # read files
-library(sp)        # spDistsN1 function
-library(mapview)   # mapview
-library(dplyr)     # arange
-################################################################################
-##### all DWD stations
-DWDstations <- read_table2("./data/TU_Stundenwerte_Beschreibung_Stationen.txt", 
-                           locale = locale(encoding = "ASCII"), 
-                           skip = 1)
+library(rSCOPE) # devtools::install_github("AlbyDR/rSCOPE")
+library(leaflet)
+library(sf)
+library(tidyverse)
+library(lubridate)
 
-colnames(DWDstations) <- c("id","from_date","to_date","height",
-                           "lat", "long", "name", "state")
-################################################################################
+##### Metadata ##################################################################################
+# Meteorological variables from DWD ftp server
+#################################################################################################
+# [1] "precipitation"       "air_temperature"     "extreme_temperature" "extreme_wind"       
+# [5] "solar"               "wind"                "wind_test"           "kl"                 
+# [9] "more_precip"         "weather_phenomena"   "soil_temperature"    "water_equiv"        
+# [13] "cloud_type"          "cloudiness"          "dew_point"           "moisture"           
+# [17] "pressure"            "sun"                 "visibility"          "wind_synop"         
+# [21] "soil"                "standard_format" 
+##################################################################################################
+# Sys.setenv(TZ='UTC')
+##################################################################################################
 
-################## coordination ############################
-## Steglitz / Rothenburg (ROTH)
-# Lat.: 52.457232°
-# Lon.: 13.315827°
-###################################################################
-### distance from Steglitz / Rothenburg (ROTH) tower
-DWDstations$distRoth <- spDistsN1(pts=as.matrix(cbind(DWDstations$long,DWDstations$lat)),
-                                  pt=c(13.315827,52.457232), # long lat ROTH
-                                  longlat=TRUE)
-arrange(DWDstations, distRoth) 
-###################################################################
-### closer for Steglitz (1.04km)
-# "Berlin-Dahlem" # 00403 
-# 2002.01.01 to 2020.07.15 
-# h=51m 2m above ground 
-# station coordination 52.4537   13.3017 
-###################################################################
-### closer for radiation  (19.2 km) 
-### Potsdam ## 03987 
-###################################################################
+## **Dataset 1** #################################################################################
+# meteo_var = **air_temperature** 
+# var_name = TT_TU, air temperature at 2m height (Ta)
+# var_name = RF_TU, relative humidity at 2m height (RH)
+##################################################################################################
 
-################## coordination ############################
-## TUCC 
-# Lat.: 52.512283°
-# Lon.: 13.327855°
-############################################################
-### distance from 
-DWDstations$distTU <- spDistsN1(pts=as.matrix(cbind(DWDstations$long,DWDstations$lat)),
-                                pt=c(13.327855,52.512283), # long lat TU
-                                longlat=TRUE)
+## **Variable 1 - air_temperature**
+Air_temp <- get_DWDdata(
+  lat_center = 52.4537, # Berlin cordinates
+  lon_center = 13.3017, 
+  radius_km = 70,      
+  time_lag = "hourly", # hour data
+  period = "historical", # for the latest data used "recent"
+  meteo_var = "air_temperature",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "TT_TU")
 
-spDistsN1(pts=as.matrix(cbind(c(13.315827,13.327855),
-                              c(52.457232,52.512283))) ,
-          pt=c(13.327855,52.512283), # long lat TU
-          longlat=TRUE)
+Air_temp[[1]]$MESS_DATUM
 
-arrange(DWDstations, distTU)
-###################################################################
-### closer to TU 
-# (5.35km) "Berlin-Alexanderplatz"  ## 00399 # too high
-# (5.94km) "Berlin-Tegel"           ## 00430 # more similar to the tower 
-# 2002.01.01 to 2020.07.15 
-# h=36m 2m above ground 
-# station coordination 52.6 13.3 
-###################################################################
-### closer for radiation  (23.2 km) 
-### Potsdam ## 03987 
-###################################################################
+summary(Air_temp[[1]])
+Air_temp[[1]][1:2]
 
-################################################
-### check the station location vs Steglitz
-###############################################
-temp <- tempfile()
-download.url <- "http://ftp-cdc.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/air_temperature/recent/"
-zipfile <- 'stundenwerte_TU_00403_akt.zip'
-download.file(paste0(download.url,zipfile),temp, mode="wb")
-metadata <- unzip(temp)
-unlink(temp)
-metadata 
+Air_temp[[1]] %>%
+  group_by(year(MESS_DATUM)) %>%
+  select("ID_403", "ID_433", "ID_430", "ID_420", "ID_400") %>%
+  summarise_if(is.numeric, max, na.rm = TRUE) %>%
+  t() %>% print()
 
-############################################################
-data.meta <- read.table("./Metadaten_Geographie_00403.txt", sep = ";", header = T)
-data.meta <- rbind(data.meta, c(001,40,52.4572,13.31582,19500101,19970711,
-                                'Rothemburg-Steglitz (Roth)','active'))
-data.meta[,3] <- as.numeric(data.meta[,3])
-data.meta[,4] <- as.numeric(data.meta[,4])
-data.meta['Status'] <- c('Berlin-Dahlem (not active)', 'Berlin-Dahlem', 'Roth')
-data.meta.spp <- SpatialPointsDataFrame(coords = as.matrix(data.meta[,c('Geogr.Laenge','Geogr.Breite')]),
-                                        data = data.meta,
-                                        proj4string = CRS("+init=epsg:4326")) # WGS 84
-mapview(data.meta.spp,
-        zcol='Status', 
-        color=c('red', 'blue', 'green'))
-############################################################
+Air_temp[[2]]$stations_name
 
-################################################
-### check the station location vs TU
-################################################
-temp <- tempfile()
-download.url <- "http://ftp-cdc.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/air_temperature/recent/"
-zipfile <- 'stundenwerte_TU_00430_akt.zip'
-download.file(paste0(download.url,zipfile),temp, mode="wb")
-metadata <- unzip(temp)
-unlink(temp)
-metadata 
-############################################################
-data.meta.TU <- read.table("./Metadaten_Geographie_00430.txt", sep = ";", header = T)
-data.meta.TU <- rbind(data.meta.TU, c(001,40,52.512283,13.327855,19940101,NA,
-                                'TU_tower (TU)','active'))
-data.meta.TU[,3] <- as.numeric(data.meta.TU[,3])
-data.meta.TU[,4] <- as.numeric(data.meta.TU[,4])
+# station available arround Berlin (points)
+stations_loc <- rdwd::nearbyStations(lat = 52.4537,
+                                     lon = 13.3017,
+                                     radius = 70,
+                                     res = "hourly",
+                                     per = "historical",
+                                     var ="air_temperature",
+                                     mindate = as.Date("2018-12-31"))
 
-data.meta.TU['Status'] <- c("old1", "old2",'Tegel', 'TU')
+leaflet() %>% addTiles() %>%
+  addPolygons(data = Berlin_border_longlat, fillColor = "green", fillOpacity = 0.2, color = "black", weight = 1) %>%
+  #addCircles(lng=13.3017, lat=52.4537, radius = 70000, col = "black") %>%
+  addCircleMarkers(data = Air_temp[[2]], ~longitude, ~latitude, col="red", popup=~stations_name)
 
-data.meta.TU <- SpatialPointsDataFrame(coords =as.matrix(data.meta.TU[,c('Geogr.Laenge','Geogr.Breite')]) ,
-                                       data = data.meta.TU,
-                                       proj4string = CRS("+init=epsg:4326")) # WGS 84
+## **Variable 2 - Relative humidity**
+# var_name = RF_TU, relative humidity at 2m height (RH)
+relative_humidity <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "air_temperature",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "RF_TU")
 
-mapview(data.meta.TU,
-        zcol='Status', 
-        color=c('red', 'blue', 'green', "black"))
+relative_humidity[[1]]$MESS_DATUM
+summary(relative_humidity[[1]])
+
+relative_humidity[[2]]
+
+relative_humidity[[1]] %>%
+  group_by(year(MESS_DATUM)) %>%
+  select("ID_403", "ID_433", "ID_430", "ID_420", "ID_400") %>%
+  summarise_if(is.numeric, min, na.rm = TRUE) %>%
+  t() %>% print()
+##################################################################################################
+##################################################################################################
+
+## **Dataset 2** #################################################################################
+# meteo_var = "precipitation"
+# var_name = R1, mm of precipitation (prec_mm)
+# var_name = RS_IND, occurrence of precipitation, 0 no precipitation / 1 precipitation fell (prec_h)
+##################################################################################################
+Prec_mm <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 30,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "precipitation",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "R1")
+
+Prec_mm[[1]]$MESS_DATUM
+summary(Prec_mm[[1]])
+
+Prec_mm[[1]] %>%
+  group_by(year(MESS_DATUM)) %>%
+  descr()
+
+Prec_mm[[1]] %>% 
+  group_by(year(MESS_DATUM)) %>%
+  select("ID_403", "ID_433", "ID_430", "ID_420", "ID_400") %>%
+  summarise_if(is.numeric, max, na.rm = TRUE) %>%
+  t() %>% print()
+
+Prec_mm[[1]] %>%
+  group_by(year(MESS_DATUM)) %>%
+  select("ID_403", "ID_433", "ID_430", "ID_420", "ID_400") %>%
+  summarise_if(is.numeric, sum, na.rm = TRUE) %>%
+  t() %>% print()
+
+saveRDS(Prec_mm, "Prec_mm_30km.rds")
+
+Prec_mm[[2]]
+
+Prec_h <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "precipitation",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "RS_IND")
+
+Prec_h[[1]]
+summary(Prec_h[[1]])
+
+Prec_h[[1]]$MESS_DATUM
+
+stations_loc <- stations_loc[-c(delete_staions),]
+
+delete_staions2 <- as.vector(stats::na.omit(sapply(1:length(data_set), function(i)
+  ifelse(is.na(utils::head(dplyr::filter(data_set[[i]], lubridate::year(MESS_DATUM) >= lubridate::year(start_date))[var_name], n = 1)) == TRUE |
+           is.na(utils::tail(dplyr::filter(data_set[[i]], lubridate::year(MESS_DATUM) >= lubridate::year(start_date))[var_name], n = 1)) == TRUE,
+         i, NA)
+)))
+
+# ### if dif than NA
+if (class(delete_staions2) == "integer"){
+  data_set <- data_set[-c(delete_staions2)]
+}
+if (class(delete_staions2) == "integer"){
+  stations_loc <- stations_loc[-c(delete_staions2),]
+}
+
+Prec_h[[2]]
+
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### meteo_var = "pressure"  
+# var_name = P0     # Pressure at station height (2m)
+# var_name = P      # Pressure at see level
+##################################################################################################
+pressure <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "pressure",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "P")
+
+pressure[[1]]$MESS_DATUM
+summary(pressure[[1]])
+
+pressure[[2]]
+
+leaflet() %>% addTiles() %>%
+  addPolygons(data = Berlin_border_longlat, fillColor = "green", fillOpacity = 0.2, color = "black", weight = 1) %>%
+  #addCircles(lng=13.3017, lat=52.4537, radius = 70000, col = "black") %>%
+  addCircleMarkers(data = pressure[[2]], ~longitude, ~latitude, col="red", popup=~stations_name)
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### meteo_var = "wind_synop" 
+# var_name = FF     # Average wind speed (ws)
+# var_name = DD     # wind direction (wd)
+##################################################################################################
+wind_ws <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "wind_synop",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "FF")
+
+wind_ws[[1]]$MESS_DATUM
+summary(wind_wd[[1]])
+
+wind_ws[[2]]
+
+# convertion to 10m height
+summary(wind_ws[[1]])
+wind_ws[[2]]$station_height
+
+ws10m_19_20 <- data.frame(sapply(1:12, function(i)
+                         WindVerification::ndbc10m(wind_ws[[1]][i+1], 
+                                                   zm = wind_ws[[2]]$station_height[i], 
+                          zref = 10, inunits = "m/s", outunits = "m/s",
+                          to.na = TRUE, missing = NA)))
+
+ws10m_19_20
+
+# wind directions
+wind_wd <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "wind_synop",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "DD")
+
+wind_wd[[1]]$MESS_DATUM
+summary(wind_wd[[1]])
+
+wind_wd[[2]]
+
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### meteo_var = "moisture" (atm)
+# var_name = P_STD	  Hourly air pressure	[hpa]
+# var_name = RF_STD	Hourly values of relative humidity	[%]
+# var_name = TD_STD	Dew point temperature at 2m height	[°C]
+# var_name = TF_STD	Calculated hourly values of the wet temperature	[°C]
+# var_name = TT_STD	Air temperature at 2m height	[°C]
+# var_name = VP_STD	calculated hourly values of the vapour pressure [hpa]
+##################################################################################################
+
+atm_moisture_ea_VP <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "moisture",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "VP_STD")
+
+atm_moisture_ea_VP[[1]]$MESS_DATUM
+summary(atm_moisture_ea_VP[[1]])
+
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### meteo_var = "sun" 
+# var_name = SD_SO   # sunshine duration - minutes
+##################################################################################################
+sun_duration <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "sun",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "SD_SO")
+
+sun_duration[[1]]$MESS_DATUM
+summary(sun_duration[[1]])
+length(sun_duration[[1]]$MESS_DATUM)
+
+sun_duration[[2]]
+
+sun_duration_df <- data.frame(sun_duration[[1]])[-1]
+
+### extraterrestrial radiation
+Ra_sun <- data.frame(sapply(1:12, function(i)
+  MeTo::Ra(x = sun_duration[[1]]$MESS_DATUM, tl = 1, # 1 = hourly
+           lat.deg = sun_duration[[2]]$latitude[i], 
+           long.deg = sun_duration[[2]]$longitude[i], 
+           control = list(Lz = 345)) ))
+
+### estimated solar radiation
+Rs_sun <- data.frame(sapply(1:12, function(i) 
+  (0.25 + 0.5*sun_duration_df[i]/60)*Ra_sun[i]*100 ))
+
+### convert to w m-2
+Rs_sun <- data.frame(sapply(1:12, function(i) 
+  round((Rs_sun[i]*100*100)/(60*60),2) ))
+
+length(sun_duration[[1]]$MESS_DATUM)
+
+Rs_sun <- cbind("timestamp" = sun_duration[[1]]$MESS_DATUM, Rs_sun)
+
+summary(Rs_sun)
+
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### meteo_var = "soil"
+# BF10/BF60 - soil moisture under grass and sandy loam between 0 and 10 cm depth in % plant useable water
+# BFGSL - soil moisture under grass and sandy loam up to 60 cm depth (AMBAV) BFGSL %nFK
+# BFGLS - soil moisture under grass and loamy sand up to 60 cm depth (AMBAV) BFGLS %nFK
+# VGSL - real evapotranspiration over grass and sandy loam (AMBAV)
+# VPGB - potention evapotranspiration over grass (AMBAV)
+# VPGH - potention evapotranspiration over grass (Haude)
+# VGLS - real evapotranspiration over grass and sandy loam (AMBAV)
+# VPGPM - potential evaotranspiration over grass (Penman Monteith, FAO formula)
+# TS10/TS60 - soil temperature ...
+##################################################################################################
+SMC_daily <- get_SMCdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "daily",
+  meteo_var = "soil",
+  start_date = "2019-01-01",
+  end_date = "2020-12-31")
+
+SMC_daily[[1]][[1]]
+summary(SMC_daily[[1]][[1]])
+
+SMC_daily[[2]]
+
+SMC_daily[[3]]
+
+##################################################################################################
+##################################################################################################
+
+##################################################################################################
+### "solar"
+# ATMO_LBERG # longwave solar radiation (Rli)
+# FD_LBERG   # diffuse radiation
+# FG_LBERG   # shortwave solar radiation (Rin)
+# SD_LBERG   # sunshine duration (min) in a hour
+# ZENIT      # sun zenith angle
+##################################################################################################
+solar_radiation <- get_Solardata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  meteo_var = "solar",
+  start_date = "2018-12-31",
+  end_date = "2021-01-02")
+
+solar_radiation[[1]][[1]]
+summary(solar_radiation[[1]][[1]])
+
+solar_radiation[[2]]
+
+library(tidyverse)
+
+solar_radiation[[1]][[1]] %>%
+  mutate(Rli = zoo::na.approx(round((ATMO_LBERG*100*100)/(60*60),2)),
+         diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
+         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
+         sun_duration = zoo::na.approx(SD_LBERG),
+         sun_zenith_angle = zoo::na.approx(ZENIT),
+         # timestamp = MESS_DATUM_WOZ,
+         timestamp = with_tz(force_tz(MESS_DATUM_WOZ, "CEST"), tz = "UTC")
+         ) %>%
+  select(timestamp,  Rin, Rli, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM) -> solar_radiation_3987
+
+summary(solar_radiation_3987)
+
+summary(solar_radiation_3987$Rin)
+summary(Rs_sun$ID_3987)
+
+head(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
+tail(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
+
+plot(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_ROTH$Rin)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_TUCC$Rin.1)
+cor.test(y = EC_DWD_TUCC$Rin, x = EC_DWD_TUCC$Rin.1)
+
+solar_radiation_3987 <- filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)
+
+solar_radiation[[1]][[2]] %>%
+  mutate(diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
+         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
+         sun_duration = zoo::na.approx(SD_LBERG),
+         sun_zenith_angle = zoo::na.approx(ZENIT),
+         timestamp = MESS_DATUM_WOZ) %>%
+  select(timestamp, Rin, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM)
+
+##################################################################################################
+##################################################################################################
+
+# Other options
+
+##################################################################################################
+### "visibility"
+# V_VV      # Visibility in meter
+# V_VV_I    # from the observer
+##################################################################################################
+
+##################################################################################################
+### "soil_temperature"
+# soil.temp.2cm
+# soil.temp.5cm 
+# soil.temp.10cm
+# soil.temp.20cm
+# soil.temp.50cm
+# soil.temp.100cm
+##################################################################################################
+
+##################################################################################################
+### "dew_point"
+# TT   # dry bulb temperature at 2 meter above ground
+# TD   # dew point temperature at 2 meter above ground
+##################################################################################################
+
+##################################################################################################
+### "cloudiness"
+#V_N    # Total coverage - eighth levels # same as cloudness
+##################################################################################################
+
 
 # Metadata
 ##############################################################################################

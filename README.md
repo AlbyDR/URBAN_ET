@@ -6,8 +6,10 @@ This page aims to share R codes to model urban ET using the Soil-Canopy-Observat
 The codes are divided into:
 
 1- Model inputs collection and preprocessing (R)
-   1.1 DWD Data
+   1.1 Meteorological station data from DWD
+   
    1.2 ICOS CO2 data
+   
    1.3 EC Data / cleaning
    1.4 Atlas land cover maps
    1.5 Footprints

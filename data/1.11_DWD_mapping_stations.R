@@ -130,6 +130,8 @@ leaflet() %>% addTiles() %>%
 # var_name = FF     # Average wind speed (ws)
 # var_name = DD     # wind direction (wd)
 ##################################################################################################
+
+## Variable 4 - wind speed
 wind_ws <- get_DWDdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -158,6 +160,7 @@ ws10m_19_20 <- data.frame(sapply(1:12, function(i)
 
 ws10m_19_20
 
+## Variable 5 
 # wind directions
 wind_wd <- get_DWDdata(
   lat_center = 52.4537,
@@ -188,6 +191,7 @@ wind_wd[[2]]
 # var_name = VP_STD	calculated hourly values of the vapour pressure [hpa]
 ##################################################################################################
 
+## Variable 6 - vapour pressure
 atm_moisture_ea_VP <- get_DWDdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -209,6 +213,8 @@ summary(atm_moisture_ea_VP[[1]])
 ### meteo_var = "sun" 
 # var_name = SD_SO   # sunshine duration - minutes
 ##################################################################################################
+                                 
+## Variable 7 - sunshine duration                             
 sun_duration <- get_DWDdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -264,6 +270,8 @@ summary(Rs_sun)
 # VPGPM - potential evaotranspiration over grass (Penman Monteith, FAO formula)
 # TS10/TS60 - soil temperature ...
 ##################################################################################################
+
+## Variable 8 - soil moisture
 SMC_daily <- get_SMCdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -291,6 +299,8 @@ SMC_daily[[3]]
 # SD_LBERG   # sunshine duration (min) in a hour
 # ZENIT      # sun zenith angle
 ##################################################################################################
+
+## Variable 9 - longwave solar radiation
 solar_radiation <- get_Solardata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -350,6 +360,8 @@ solar_radiation[[1]][[2]] %>%
 # var_name = R1, mm of precipitation (prec_mm)
 # var_name = RS_IND, occurrence of precipitation, 0 no precipitation / 1 precipitation fell (prec_h)
 ##################################################################################################
+
+## Variable 10 - mm of precipitation (prec_mm)
 Prec_mm <- get_DWDdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -384,6 +396,7 @@ saveRDS(Prec_mm, "Prec_mm_30km.rds")
 
 Prec_mm[[2]]
 
+## Variable 10 - precipitation occurance
 Prec_h <- get_DWDdata(
   lat_center = 52.4537,
   lon_center = 13.3017, 
@@ -420,13 +433,11 @@ Prec_h[[2]]
 
 
 # Other options of datasets (not used)
-
 ##################################################################################################
 ### "visibility"
 # V_VV      # Visibility in meter
 # V_VV_I    # from the observer
 ##################################################################################################
-
 ##################################################################################################
 ### "soil_temperature"
 # soil.temp.2cm
@@ -436,13 +447,11 @@ Prec_h[[2]]
 # soil.temp.50cm
 # soil.temp.100cm
 ##################################################################################################
-
 ##################################################################################################
 ### "dew_point"
 # TT   # dry bulb temperature at 2 meter above ground
 # TD   # dew point temperature at 2 meter above ground
 ##################################################################################################
-
 ##################################################################################################
 ### "cloudiness"
 #V_N    # Total coverage - eighth levels # same as cloudness

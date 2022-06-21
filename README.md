@@ -1,11 +1,11 @@
-# URBAN-ET
+# URBAN ET
 Modelling of evapotranspiration in urban environments
 
-This page aims to share R codes and the Matlab code for Soil-Canopy-Observation of Photosynthesis and Energy fluxes (SCOPE) adapted to the Berlin case study.
+This page aims to share R codes to model urban ET using the Soil-Canopy-Observation of Photosynthesis and Energy fluxes (SCOPE). A case study using open-access data for Berlin is used throghout the repository. SCOPE code is originally in MATLAB, but it will be run through the R package rSCOPE (see more at https://github.com/AlbyDR/rSCOPE).
 
 The codes are divided into:
 
-1- Data collection and preprocessing (R)
+1- Model inputs collection and preprocessing (R)
    1.1 DWD Data
    1.2 ICOS CO2 data
    1.3 EC Data / cleaning

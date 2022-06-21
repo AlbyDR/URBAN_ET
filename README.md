@@ -30,15 +30,18 @@ This page aims to share R codes to model urban ET using the Soil-Canopy-Observat
       2.3 Getting the prediction
       
       2.4 Correct the prediction to urban environment
+      
+      2.5 Model accuracy assessment with EC data (if available)
+      
+      2.6 Simulated climate change scenarios (Sensitivity analysis)
+     
    
    
    
 **3- Results and Model accuracy assessment (R)**
 
-   - Read SCOPE outputs
-   
-   - Apply the correction factor and calculate model metrics
-   
-   - Analysis of the footprint results
-   
-   - Plots, maps and figures
+         3.1 Mapping ET
+
+         3.2 Creating the cooling service indices (Greening, Evapotranspirative and radiative effects)
+
+         3.3 Generate nice plots, maps and figures

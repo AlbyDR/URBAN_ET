@@ -14,15 +14,15 @@ library(lubridate)
 # [13] "cloud_type"          "cloudiness"          "dew_point"           "moisture"           
 # [17] "pressure"            "sun"                 "visibility"          "wind_synop"         
 # [21] "soil"                "standard_format" 
-##################################################################################################
+#################################################################################################
 # Sys.setenv(TZ='UTC')
-##################################################################################################
+#################################################################################################
 
-## Dataset 1 #################################################################################
+## Dataset 1 ####################################################################################
 # meteo_var = **air_temperature** 
 # var_name = TT_TU, air temperature at 2m height (Ta)
 # var_name = RF_TU, relative humidity at 2m height (RH)
-##################################################################################################
+#################################################################################################
 
 ## Variable 1 - air_temperature
 Air_temp <- get_DWDdata(
@@ -58,12 +58,17 @@ stations_loc <- rdwd::nearbyStations(lat = 52.4537,
                                      var ="air_temperature",
                                      mindate = as.Date("2018-12-31"))
 
+# Berlin bourders (polygon)
+load(url("https://userpage.fu-berlin.de/soga/300/30100_data_sets/berlin_district.RData")) # berlin border
+Berlin_border_longlat <- sf::st_transform(berlin.sf, crs = "+proj=longlat +datum=WGS84")
+
+# station available arround Berlin (points)
 leaflet() %>% addTiles() %>%
   addPolygons(data = Berlin_border_longlat, fillColor = "green", fillOpacity = 0.2, color = "black", weight = 1) %>%
   #addCircles(lng=13.3017, lat=52.4537, radius = 70000, col = "black") %>%
   addCircleMarkers(data = Air_temp[[2]], ~longitude, ~latitude, col="red", popup=~stations_name)
 
-## **Variable 2 - Relative humidity**
+## Variable 2 - Relative humidity
 # var_name = RF_TU, relative humidity at 2m height (RH)
 relative_humidity <- get_DWDdata(
   lat_center = 52.4537,
@@ -89,7 +94,258 @@ relative_humidity[[1]] %>%
 ##################################################################################################
 ##################################################################################################
 
-## **Dataset 2** #################################################################################
+## Dataset 2 ####################################################################################
+### meteo_var = "pressure"  
+# var_name = P0     # Pressure at station height (2m)
+# var_name = P      # Pressure at see level
+##################################################################################################
+
+# Variable 3 - air pressure
+pressure <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "pressure",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "P")
+
+pressure[[1]]$MESS_DATUM
+summary(pressure[[1]])
+
+pressure[[2]]
+
+leaflet() %>% addTiles() %>%
+  addPolygons(data = Berlin_border_longlat, fillColor = "green", fillOpacity = 0.2, color = "black", weight = 1) %>%
+  #addCircles(lng=13.3017, lat=52.4537, radius = 70000, col = "black") %>%
+  addCircleMarkers(data = pressure[[2]], ~longitude, ~latitude, col="red", popup=~stations_name)
+
+##################################################################################################
+##################################################################################################
+
+## Dataset 3 ####################################################################################
+### meteo_var = "wind_synop" 
+# var_name = FF     # Average wind speed (ws)
+# var_name = DD     # wind direction (wd)
+##################################################################################################
+wind_ws <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "wind_synop",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "FF")
+
+wind_ws[[1]]$MESS_DATUM
+summary(wind_wd[[1]])
+
+wind_ws[[2]]
+
+# convertion to 10m height
+summary(wind_ws[[1]])
+wind_ws[[2]]$station_height
+
+ws10m_19_20 <- data.frame(sapply(1:12, function(i)
+                         WindVerification::ndbc10m(wind_ws[[1]][i+1], 
+                                                   zm = wind_ws[[2]]$station_height[i], 
+                          zref = 10, inunits = "m/s", outunits = "m/s",
+                          to.na = TRUE, missing = NA)))
+
+ws10m_19_20
+
+# wind directions
+wind_wd <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "wind_synop",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "DD")
+
+wind_wd[[1]]$MESS_DATUM
+summary(wind_wd[[1]])
+
+wind_wd[[2]]
+
+##################################################################################################
+##################################################################################################
+
+## Dataset 4 ####################################################################################
+### meteo_var = "moisture" (atm)
+# var_name = P_STD	  Hourly air pressure	[hpa]
+# var_name = RF_STD	Hourly values of relative humidity	[%]
+# var_name = TD_STD	Dew point temperature at 2m height	[°C]
+# var_name = TF_STD	Calculated hourly values of the wet temperature	[°C]
+# var_name = TT_STD	Air temperature at 2m height	[°C]
+# var_name = VP_STD	calculated hourly values of the vapour pressure [hpa]
+##################################################################################################
+
+atm_moisture_ea_VP <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "moisture",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "VP_STD")
+
+atm_moisture_ea_VP[[1]]$MESS_DATUM
+summary(atm_moisture_ea_VP[[1]])
+
+##################################################################################################
+##################################################################################################
+
+## Dataset 5 ####################################################################################
+### meteo_var = "sun" 
+# var_name = SD_SO   # sunshine duration - minutes
+##################################################################################################
+sun_duration <- get_DWDdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  period = "historical",
+  meteo_var = "sun",
+  start_date = "2018-12-31",
+  end_date = "2020-12-31",
+  var_name = "SD_SO")
+
+sun_duration[[1]]$MESS_DATUM
+summary(sun_duration[[1]])
+length(sun_duration[[1]]$MESS_DATUM)
+
+sun_duration[[2]]
+
+sun_duration_df <- data.frame(sun_duration[[1]])[-1]
+
+### extraterrestrial radiation
+Ra_sun <- data.frame(sapply(1:12, function(i)
+  MeTo::Ra(x = sun_duration[[1]]$MESS_DATUM, tl = 1, # 1 = hourly
+           lat.deg = sun_duration[[2]]$latitude[i], 
+           long.deg = sun_duration[[2]]$longitude[i], 
+           control = list(Lz = 345)) ))
+
+### estimated solar radiation
+Rs_sun <- data.frame(sapply(1:12, function(i) 
+  (0.25 + 0.5*sun_duration_df[i]/60)*Ra_sun[i]*100 ))
+
+### convert to w m-2
+Rs_sun <- data.frame(sapply(1:12, function(i) 
+  round((Rs_sun[i]*100*100)/(60*60),2) ))
+
+length(sun_duration[[1]]$MESS_DATUM)
+
+Rs_sun <- cbind("timestamp" = sun_duration[[1]]$MESS_DATUM, Rs_sun)
+
+summary(Rs_sun)
+
+##################################################################################################
+##################################################################################################
+
+## Dataset 6 ####################################################################################
+### meteo_var = "soil"
+# BF10/BF60 - soil moisture under grass and sandy loam between 0 and 10 cm depth in % plant useable water
+# BFGSL - soil moisture under grass and sandy loam up to 60 cm depth (AMBAV) BFGSL %nFK
+# BFGLS - soil moisture under grass and loamy sand up to 60 cm depth (AMBAV) BFGLS %nFK
+# VGSL - real evapotranspiration over grass and sandy loam (AMBAV)
+# VPGB - potention evapotranspiration over grass (AMBAV)
+# VPGH - potention evapotranspiration over grass (Haude)
+# VGLS - real evapotranspiration over grass and sandy loam (AMBAV)
+# VPGPM - potential evaotranspiration over grass (Penman Monteith, FAO formula)
+# TS10/TS60 - soil temperature ...
+##################################################################################################
+SMC_daily <- get_SMCdata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "daily",
+  meteo_var = "soil",
+  start_date = "2019-01-01",
+  end_date = "2020-12-31")
+
+SMC_daily[[1]][[1]]
+summary(SMC_daily[[1]][[1]])
+
+SMC_daily[[2]]
+
+SMC_daily[[3]]
+
+##################################################################################################
+##################################################################################################
+
+## Dataset 7 ####################################################################################
+### "solar"
+# ATMO_LBERG # longwave solar radiation (Rli)
+# FD_LBERG   # diffuse radiation
+# FG_LBERG   # shortwave solar radiation (Rin)
+# SD_LBERG   # sunshine duration (min) in a hour
+# ZENIT      # sun zenith angle
+##################################################################################################
+solar_radiation <- get_Solardata(
+  lat_center = 52.4537,
+  lon_center = 13.3017, 
+  radius_km = 70,
+  time_lag = "hourly",
+  meteo_var = "solar",
+  start_date = "2018-12-31",
+  end_date = "2021-01-02")
+
+solar_radiation[[1]][[1]]
+summary(solar_radiation[[1]][[1]])
+
+solar_radiation[[2]]
+
+library(tidyverse)
+
+solar_radiation[[1]][[1]] %>%
+  mutate(Rli = zoo::na.approx(round((ATMO_LBERG*100*100)/(60*60),2)),
+         diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
+         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
+         sun_duration = zoo::na.approx(SD_LBERG),
+         sun_zenith_angle = zoo::na.approx(ZENIT),
+         # timestamp = MESS_DATUM_WOZ,
+         timestamp = with_tz(force_tz(MESS_DATUM_WOZ, "CEST"), tz = "UTC")
+         ) %>%
+  select(timestamp,  Rin, Rli, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM) -> solar_radiation_3987
+
+summary(solar_radiation_3987)
+
+summary(solar_radiation_3987$Rin)
+summary(Rs_sun$ID_3987)
+
+head(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
+tail(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
+
+plot(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_ROTH$Rin)
+cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_TUCC$Rin.1)
+cor.test(y = EC_DWD_TUCC$Rin, x = EC_DWD_TUCC$Rin.1)
+
+solar_radiation_3987 <- filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)
+
+solar_radiation[[1]][[2]] %>%
+  mutate(diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
+         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
+         sun_duration = zoo::na.approx(SD_LBERG),
+         sun_zenith_angle = zoo::na.approx(ZENIT),
+         timestamp = MESS_DATUM_WOZ) %>%
+  select(timestamp, Rin, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM)
+
+##################################################################################################
+##################################################################################################
+                            
+## Dataset 8 #####################################################################################
 # meteo_var = "precipitation"
 # var_name = R1, mm of precipitation (prec_mm)
 # var_name = RS_IND, occurrence of precipitation, 0 no precipitation / 1 precipitation fell (prec_h)
@@ -162,258 +418,8 @@ if (class(delete_staions2) == "integer"){
 
 Prec_h[[2]]
 
-##################################################################################################
-##################################################################################################
 
-##################################################################################################
-### meteo_var = "pressure"  
-# var_name = P0     # Pressure at station height (2m)
-# var_name = P      # Pressure at see level
-##################################################################################################
-pressure <- get_DWDdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  period = "historical",
-  meteo_var = "pressure",
-  start_date = "2018-12-31",
-  end_date = "2020-12-31",
-  var_name = "P")
-
-pressure[[1]]$MESS_DATUM
-summary(pressure[[1]])
-
-pressure[[2]]
-
-leaflet() %>% addTiles() %>%
-  addPolygons(data = Berlin_border_longlat, fillColor = "green", fillOpacity = 0.2, color = "black", weight = 1) %>%
-  #addCircles(lng=13.3017, lat=52.4537, radius = 70000, col = "black") %>%
-  addCircleMarkers(data = pressure[[2]], ~longitude, ~latitude, col="red", popup=~stations_name)
-##################################################################################################
-##################################################################################################
-
-##################################################################################################
-### meteo_var = "wind_synop" 
-# var_name = FF     # Average wind speed (ws)
-# var_name = DD     # wind direction (wd)
-##################################################################################################
-wind_ws <- get_DWDdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  period = "historical",
-  meteo_var = "wind_synop",
-  start_date = "2018-12-31",
-  end_date = "2020-12-31",
-  var_name = "FF")
-
-wind_ws[[1]]$MESS_DATUM
-summary(wind_wd[[1]])
-
-wind_ws[[2]]
-
-# convertion to 10m height
-summary(wind_ws[[1]])
-wind_ws[[2]]$station_height
-
-ws10m_19_20 <- data.frame(sapply(1:12, function(i)
-                         WindVerification::ndbc10m(wind_ws[[1]][i+1], 
-                                                   zm = wind_ws[[2]]$station_height[i], 
-                          zref = 10, inunits = "m/s", outunits = "m/s",
-                          to.na = TRUE, missing = NA)))
-
-ws10m_19_20
-
-# wind directions
-wind_wd <- get_DWDdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  period = "historical",
-  meteo_var = "wind_synop",
-  start_date = "2018-12-31",
-  end_date = "2020-12-31",
-  var_name = "DD")
-
-wind_wd[[1]]$MESS_DATUM
-summary(wind_wd[[1]])
-
-wind_wd[[2]]
-
-##################################################################################################
-##################################################################################################
-
-##################################################################################################
-### meteo_var = "moisture" (atm)
-# var_name = P_STD	  Hourly air pressure	[hpa]
-# var_name = RF_STD	Hourly values of relative humidity	[%]
-# var_name = TD_STD	Dew point temperature at 2m height	[°C]
-# var_name = TF_STD	Calculated hourly values of the wet temperature	[°C]
-# var_name = TT_STD	Air temperature at 2m height	[°C]
-# var_name = VP_STD	calculated hourly values of the vapour pressure [hpa]
-##################################################################################################
-
-atm_moisture_ea_VP <- get_DWDdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  period = "historical",
-  meteo_var = "moisture",
-  start_date = "2018-12-31",
-  end_date = "2020-12-31",
-  var_name = "VP_STD")
-
-atm_moisture_ea_VP[[1]]$MESS_DATUM
-summary(atm_moisture_ea_VP[[1]])
-
-##################################################################################################
-##################################################################################################
-
-##################################################################################################
-### meteo_var = "sun" 
-# var_name = SD_SO   # sunshine duration - minutes
-##################################################################################################
-sun_duration <- get_DWDdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  period = "historical",
-  meteo_var = "sun",
-  start_date = "2018-12-31",
-  end_date = "2020-12-31",
-  var_name = "SD_SO")
-
-sun_duration[[1]]$MESS_DATUM
-summary(sun_duration[[1]])
-length(sun_duration[[1]]$MESS_DATUM)
-
-sun_duration[[2]]
-
-sun_duration_df <- data.frame(sun_duration[[1]])[-1]
-
-### extraterrestrial radiation
-Ra_sun <- data.frame(sapply(1:12, function(i)
-  MeTo::Ra(x = sun_duration[[1]]$MESS_DATUM, tl = 1, # 1 = hourly
-           lat.deg = sun_duration[[2]]$latitude[i], 
-           long.deg = sun_duration[[2]]$longitude[i], 
-           control = list(Lz = 345)) ))
-
-### estimated solar radiation
-Rs_sun <- data.frame(sapply(1:12, function(i) 
-  (0.25 + 0.5*sun_duration_df[i]/60)*Ra_sun[i]*100 ))
-
-### convert to w m-2
-Rs_sun <- data.frame(sapply(1:12, function(i) 
-  round((Rs_sun[i]*100*100)/(60*60),2) ))
-
-length(sun_duration[[1]]$MESS_DATUM)
-
-Rs_sun <- cbind("timestamp" = sun_duration[[1]]$MESS_DATUM, Rs_sun)
-
-summary(Rs_sun)
-
-##################################################################################################
-##################################################################################################
-
-##################################################################################################
-### meteo_var = "soil"
-# BF10/BF60 - soil moisture under grass and sandy loam between 0 and 10 cm depth in % plant useable water
-# BFGSL - soil moisture under grass and sandy loam up to 60 cm depth (AMBAV) BFGSL %nFK
-# BFGLS - soil moisture under grass and loamy sand up to 60 cm depth (AMBAV) BFGLS %nFK
-# VGSL - real evapotranspiration over grass and sandy loam (AMBAV)
-# VPGB - potention evapotranspiration over grass (AMBAV)
-# VPGH - potention evapotranspiration over grass (Haude)
-# VGLS - real evapotranspiration over grass and sandy loam (AMBAV)
-# VPGPM - potential evaotranspiration over grass (Penman Monteith, FAO formula)
-# TS10/TS60 - soil temperature ...
-##################################################################################################
-SMC_daily <- get_SMCdata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "daily",
-  meteo_var = "soil",
-  start_date = "2019-01-01",
-  end_date = "2020-12-31")
-
-SMC_daily[[1]][[1]]
-summary(SMC_daily[[1]][[1]])
-
-SMC_daily[[2]]
-
-SMC_daily[[3]]
-
-##################################################################################################
-##################################################################################################
-
-##################################################################################################
-### "solar"
-# ATMO_LBERG # longwave solar radiation (Rli)
-# FD_LBERG   # diffuse radiation
-# FG_LBERG   # shortwave solar radiation (Rin)
-# SD_LBERG   # sunshine duration (min) in a hour
-# ZENIT      # sun zenith angle
-##################################################################################################
-solar_radiation <- get_Solardata(
-  lat_center = 52.4537,
-  lon_center = 13.3017, 
-  radius_km = 70,
-  time_lag = "hourly",
-  meteo_var = "solar",
-  start_date = "2018-12-31",
-  end_date = "2021-01-02")
-
-solar_radiation[[1]][[1]]
-summary(solar_radiation[[1]][[1]])
-
-solar_radiation[[2]]
-
-library(tidyverse)
-
-solar_radiation[[1]][[1]] %>%
-  mutate(Rli = zoo::na.approx(round((ATMO_LBERG*100*100)/(60*60),2)),
-         diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
-         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
-         sun_duration = zoo::na.approx(SD_LBERG),
-         sun_zenith_angle = zoo::na.approx(ZENIT),
-         # timestamp = MESS_DATUM_WOZ,
-         timestamp = with_tz(force_tz(MESS_DATUM_WOZ, "CEST"), tz = "UTC")
-         ) %>%
-  select(timestamp,  Rin, Rli, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM) -> solar_radiation_3987
-
-summary(solar_radiation_3987)
-
-summary(solar_radiation_3987$Rin)
-summary(Rs_sun$ID_3987)
-
-head(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
-tail(filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020))
-
-plot(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
-cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = Rs_sun$ID_3987)
-cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_ROTH$Rin)
-cor.test(y = filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)$Rin, x = EC_DWD_TUCC$Rin.1)
-cor.test(y = EC_DWD_TUCC$Rin, x = EC_DWD_TUCC$Rin.1)
-
-solar_radiation_3987 <- filter(solar_radiation_3987, year(timestamp) == 2019 | year(timestamp) == 2020)
-
-solar_radiation[[1]][[2]] %>%
-  mutate(diffuse_radiation = zoo::na.approx(round((FD_LBERG*100*100)/(60*60),2)), 
-         Rin = zoo::na.approx(round((FG_LBERG*100*100)/(60*60),2)), 
-         sun_duration = zoo::na.approx(SD_LBERG),
-         sun_zenith_angle = zoo::na.approx(ZENIT),
-         timestamp = MESS_DATUM_WOZ) %>%
-  select(timestamp, Rin, diffuse_radiation, sun_duration, sun_zenith_angle, MESS_DATUM)
-
-##################################################################################################
-##################################################################################################
-
-# Other options
+# Other options of datasets (not used)
 
 ##################################################################################################
 ### "visibility"
@@ -443,7 +449,7 @@ solar_radiation[[1]][[2]] %>%
 ##################################################################################################
 
 
-# Metadata
+# Metadata for a station close to the site ROTH
 ##############################################################################################
 ############# Berlin-Dahlem climate station ###### 00403 #####################################
 ##############################################################################################
@@ -468,7 +474,7 @@ solar_radiation[[1]][[2]] %>%
 #[22] "wind.direction"   # D - wind direction     - synop     (degree) stundenwerte_F_00403_akt
 ################################################################################################
 
-# Metadata
+# Metadata for a station close to the site TUCC
 ##############################################################################################
 ############# Berlin-Tegelclimate station #### 00430 #########################################
 ##############################################################################################

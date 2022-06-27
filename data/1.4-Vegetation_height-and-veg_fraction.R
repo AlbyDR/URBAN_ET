@@ -1,5 +1,12 @@
 library(rSCOPE)
+library(raster)
+library(sf)
+library(exactextractr)
 library(ggplot2)
+library(ggspatial)
+library(gghighlight)
+library(lubridate)
+library(tidyverse)
 #############################################################
 ############ polygons BERLIN ENVIRONMENT ATLAS ##############
 #############################################################

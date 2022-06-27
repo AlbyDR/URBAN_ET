@@ -237,8 +237,6 @@ plot(SMC_60_filled[[17544]])
 # convert field capacity of volumic to volumic % (vol_%)
 krg_SMC60 <- lapply(1:17544, FUN = function(i) ((((37-13)*(raster::values(SMC_60_filled[[i]]))) + 13)/100))
 
-krg_SMC60 <- lapply(1:17544, FUN = function(i) raster::raster(SMC_60_filled[[i]]))
-
 krg_SMC60[[1]]
 plot(krg_SMC60[[17544]])
 plot(Berlin_border_utm, add=T, col = "transparent")

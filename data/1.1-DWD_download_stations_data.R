@@ -8,6 +8,7 @@ library(lubridate)
 #################################################################################################
 # Meteorological variables from DWD ftp server
 # https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/hourly/
+# hourly data is divided in historical and recent data (download separately and merge if needed)
 #################################################################################################
 # [1] "precipitation"       "air_temperature"     "extreme_temperature" "extreme_wind"       
 # [5] "solar"               "wind"                "wind_test"           "kl"                 
@@ -18,6 +19,8 @@ library(lubridate)
 #################################################################################################
 # Sys.setenv(TZ='UTC')
 #################################################################################################
+###########################################################################################
+### download the DWD data
 
 ## Dataset 1 ####################################################################################
 # meteo_var = **air_temperature** 
@@ -151,7 +154,8 @@ wind_ws[[1]]$MESS_DATUM
 summary(wind_wd[[1]])
 
 wind_ws[[2]]
-
+sink()
+sink()
 # convertion to 10m height
 summary(wind_ws[[1]])
 wind_ws[[2]]$station_height
@@ -162,7 +166,7 @@ ws10m_19_20 <- data.frame(sapply(1:12, function(i)
                           zref = 10, inunits = "m/s", outunits = "m/s",
                           to.na = TRUE, missing = NA)))
 
-ws10m_19_20
+wind_wd[[1]] <- ws10m_19_20
 
 ## Variable 5 
 # wind directions
@@ -262,6 +266,9 @@ Rs_sun <- cbind("timestamp" = sun_duration[[1]]$MESS_DATUM, Rs_sun)
 
 summary(Rs_sun)
 
+RS_SunD_Rin <- sun_duration
+RS_SunD_Rin[[1]] <- Rs_sun
+RS_SunD_Rin[[2]] <- RS_SunD_Rin[[2]][-10,]
 ##################################################################################################
 ##################################################################################################
 

@@ -27,6 +27,7 @@ model_inputs(SCOPE_dir = "D:/SCOPE-master/")[[3]]
 Inputs_Berlin_19 <- filter(Inputs_Berlin, year(BerkeleyJulianDateToPOSIXct(Inputs_Berlin$t, "UTC"))==2019)
 Inputs_Berlin_20 <- filter(Inputs_Berlin, year(BerkeleyJulianDateToPOSIXct(Inputs_Berlin$t, "UTC"))==2020)
 
+# A tibble: 9,636,048 × 17
 names(Inputs_Berlin_20)
 
 # saveRDS(Inputs_Berlin_19, "Inputs_Berlin_2019.rds")
@@ -57,6 +58,7 @@ n_split = 55
 for (i in 1:55) {
   run_SCOPE(csv_inputs = Inputs_Berlin_20,
             Simulation_Name = paste0("ET_Berlin2020_", i),
+            SCOPE_dir = "D:/SCOPE-master/",
             split = TRUE,
             col_split = "split_55", #dataset_for_verification
             split_values = split_20pixels[i],
@@ -68,9 +70,11 @@ for (i in 1:55) {
             SMC = "SMC60",
             LAI = "LAI", 
             hc = "hc_vh",
+            # constants
             z_c = 40,
             startDOY = 20181201, endDOY = 20200130,  # timestamp period
             LAT = 52.5, LON = 13.32, timezn = 1,   # Lat/long and time zone
+            # model settings
             lite = 1,
             soilspectrum = 1, 
             applTcorr = 1, 
@@ -89,7 +93,7 @@ for (i in 1:55) {
 Inputs_Berlin_20_p882 <- filter(Inputs_Berlin_20, id_pixel==882)
 
 run_SCOPE(csv_inputs = Inputs_Berlin_20_p882,
-          SCOPE_dir = "D:/SCOPE-2.1/",
+          SCOPE_dir = "D:/SCOPE-master/",
           Simulation_Name = "DWD_882",
           split = FALSE,
           # variable names

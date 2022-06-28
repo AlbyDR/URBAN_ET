@@ -4,9 +4,8 @@ library(ncdf4) # read .nc data
 library(sf)
 library(lubridate)
 library(ggplot2)
-#library(zoo) # rollmean
 library(REddyProc) #POSIXctToBerkeleyJulianDate
-
+library(spatialEco)
 ##########################################################################
 ##### LAI - Copernicus 300m product
 ##########################################################################
@@ -23,7 +22,6 @@ library(REddyProc) #POSIXctToBerkeleyJulianDate
 #                            product="lai", resolution="300m", version="v1")
 ##########################################################################
 # downloaded files with spatialEco
-library(spatialEco)
 # lai <- cgls_urls(resolution = 300, product = "lai") # for all available files
 # head(basename(lai))
 

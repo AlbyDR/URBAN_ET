@@ -104,113 +104,108 @@ plot(veg_fraction["veg_fraction"], border = "transparent")
 
 ############################################################################
 # LULC Copernicus Urban Atlas 2018
-# LCLU_Uatlas <- sf::st_read("C:/Users/.../Documents/UWI/R_SCOPE/DE001L1_BERLIN_UA2018_v013/Data/DE001L1_BERLIN_UA2018_v013.gpkg")
-# LCLU_Uatlas <- sf::st_transform(LCLU_Uatlas, crs = sf::st_crs(Berlin_buffer_utm))
-# 
-# # crop to Berlin Area
-# LCLU_berlin <- sf::st_crop(LCLU_Uatlas, Berlin_buffer_utm)
-# 
-# unique(LCLU_Uatlas_berlinb$class_2018)
-# unique(LCLU_Uatlas_berlinb$code_2018)
-# 
-# LCLU_b <- LCLU_berlin["class_2018"]
-# LCLU_b$classII <- LCLU_berlin$class_2018
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Fast transit roads and associated land"] <- "Roads"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Other roads and associated land"] <- "Roads"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Railways and associated land"] <- "Roads"
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Arable land (annual crops)"] <- "Crops and pastures"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Complex and mixed cultivation patterns"] <- "Crops and pastures"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Pastures"] <- "Crops and pastures"
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Construction sites"] <- "Other articifial areas"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Isolated structures"] <-  "Other articifial areas"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Land without current use"] <-  "Other articifial areas"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Mineral extraction and dump sites"] <-  "Other articifial areas"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Airports"] <- "Other articifial areas"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Port areas"] <- "Other articifial areas"
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Sports and leisure facilities"] <- "Sports and leisure"
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Industrial, commercial, public, military and private units"] <- "Industrial-commercial-public"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Continuous urban fabric (S.L. : > 80%)"] <-  "Urban fabric (>80%)"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous dense urban fabric (S.L. : 50% -  80%)"] <-  "Urban fabric (50%-80%)"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous medium density urban fabric (S.L. : 30% - 50%)"] <-  "Urban fabric (30%-50%)"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous low density urban fabric (S.L. : 10% - 30%)"] <- "Urban fabric (10%-30%)"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous very low density urban fabric (S.L. : < 10%)"] <- "Urban fabric (10%)"
-# 
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Herbaceous vegetation associations (natural grassland, moors...)"] <- "Herbaceous vegetation"
-# LCLU_b$classII[LCLU_berlin$class_2018 == "Open spaces with little or no vegetation (beaches, dunes, bare rocks, glaciers)"] <- "Natural, no vegetation"
-# 
-# unique(LCLU_b$classII)
-# t(table(LCLU_berlin$class_2018))
-# 
-# paletteLULC <- c(
-#   "Urban fabric (>80%)" =  "#800000",
-#   "Urban fabric (50%-80%)"  =  "#BE0000",
-#   "Urban fabric (30%-50%)" =  "#FE4040",
-#   "Urban fabric (10%-30%)" =  "#FE8081",
-#   "Urban fabric (10%)" =  "#FFBFBF",
-#   "Industrial-commercial-public" =  "#CC4DF2",
-#   "Other articifial areas" =  "#E6CCE7",
-#   "Roads"=  "#B3B3B3",
-#   "Natural, no vegetation" ="#CDFFCC",
-#   "Sports and leisure" =  "#AED2A4",
-#   "Green urban areas" = "#8CDC00",                    
-#   "Herbaceous vegetation" ="#CCF24D",  
-#   "Forests" = "#008C00",
-#   "Crops and pastures" = "#FFFFA7",
-#   "Water"  = "#80F3E5",
-#   "Wetlands" = "#A6A6FE")
-# 
-# LabelsLULC <- c(
-#   "Urban fabric (>80%)",
-#   "Urban fabric (50%-80%)",
-#   "Urban fabric (30%-50%)",
-#   "Urban fabric (10%-30%)",
-#   "Urban fabric (10%)",
-#   "Industrial-commercial-public",
-#   "Other articifial areas",
-#   "Roads",
-#   "Natural, no vegetation",
-#   "Sports and leisure",
-#   "Green urban areas",                    
-#   "Herbaceous vegetation",  
-#   "Forests",    
-#   "Crops and pastures",
-#   "Water",
-#   "Wetlands")
-# 
-# ggplot(LCLU_b) +
-#   geom_sf(aes(fill = classII), colour = NA) +
-#   geom_sf(data = berlin.sf, fill = "transparent", size = 1.2, color = "black") +
-#   scale_fill_manual(values = paletteLULC,
-#                     labels = LabelsLULC,
-#                     breaks = LabelsLULC,
-#                     name = "LU/LC")
+LCLU_Uatlas <- sf::st_read("C:/Users/.../Documents/UWI/R_SCOPE/DE001L1_BERLIN_UA2018_v013/Data/DE001L1_BERLIN_UA2018_v013.gpkg")
+LCLU_Uatlas <- sf::st_transform(LCLU_Uatlas, crs = sf::st_crs(Berlin_buffer_utm))
+
+# crop to Berlin Area
+LCLU_berlin <- sf::st_crop(LCLU_Uatlas, Berlin_buffer_utm)
+
+unique(LCLU_Uatlas_berlinb$class_2018)
+unique(LCLU_Uatlas_berlinb$code_2018)
+
+LCLU_b <- LCLU_berlin["class_2018"]
+LCLU_b$classII <- LCLU_berlin$class_2018
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Fast transit roads and associated land"] <- "Roads"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Other roads and associated land"] <- "Roads"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Railways and associated land"] <- "Roads"
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Arable land (annual crops)"] <- "Crops and pastures"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Complex and mixed cultivation patterns"] <- "Crops and pastures"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Pastures"] <- "Crops and pastures"
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Construction sites"] <- "Other articifial areas"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Isolated structures"] <-  "Other articifial areas"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Land without current use"] <-  "Other articifial areas"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Mineral extraction and dump sites"] <-  "Other articifial areas"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Airports"] <- "Other articifial areas"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Port areas"] <- "Other articifial areas"
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Sports and leisure facilities"] <- "Sports and leisure"
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Industrial, commercial, public, military and private units"] <- "Industrial-commercial-public"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Continuous urban fabric (S.L. : > 80%)"] <-  "Urban fabric (>80%)"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous dense urban fabric (S.L. : 50% -  80%)"] <-  "Urban fabric (50%-80%)"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous medium density urban fabric (S.L. : 30% - 50%)"] <-  "Urban fabric (30%-50%)"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous low density urban fabric (S.L. : 10% - 30%)"] <- "Urban fabric (10%-30%)"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Discontinuous very low density urban fabric (S.L. : < 10%)"] <- "Urban fabric (10%)"
+
+LCLU_b$classII[LCLU_berlin$class_2018 == "Herbaceous vegetation associations (natural grassland, moors...)"] <- "Herbaceous vegetation"
+LCLU_b$classII[LCLU_berlin$class_2018 == "Open spaces with little or no vegetation (beaches, dunes, bare rocks, glaciers)"] <- "Natural, no vegetation"
+
+unique(LCLU_b$classII)
+t(table(LCLU_berlin$class_2018))
+
+paletteLULC <- c(
+  "Urban fabric (>80%)" =  "#800000",
+  "Urban fabric (50%-80%)"  =  "#BE0000",
+  "Urban fabric (30%-50%)" =  "#FE4040",
+  "Urban fabric (10%-30%)" =  "#FE8081",
+  "Urban fabric (10%)" =  "#FFBFBF",
+  "Industrial-commercial-public" =  "#CC4DF2",
+  "Other articifial areas" =  "#E6CCE7",
+  "Roads"=  "#B3B3B3",
+  "Natural, no vegetation" ="#CDFFCC",
+  "Sports and leisure" =  "#AED2A4",
+  "Green urban areas" = "#8CDC00",
+  "Herbaceous vegetation" ="#CCF24D",
+  "Forests" = "#008C00",
+  "Crops and pastures" = "#FFFFA7",
+  "Water"  = "#80F3E5",
+  "Wetlands" = "#A6A6FE")
+
+LabelsLULC <- c(
+  "Urban fabric (>80%)",
+  "Urban fabric (50%-80%)",
+  "Urban fabric (30%-50%)",
+  "Urban fabric (10%-30%)",
+  "Urban fabric (10%)",
+  "Industrial-commercial-public",
+  "Other articifial areas",
+  "Roads",
+  "Natural, no vegetation",
+  "Sports and leisure",
+  "Green urban areas",
+  "Herbaceous vegetation",
+  "Forests",
+  "Crops and pastures",
+  "Water",
+  "Wetlands")
+
+ggplot(LCLU_b) +
+  geom_sf(aes(fill = classII), colour = NA) +
+  geom_sf(data = Berlin_border_utm, fill = "transparent", size = 1.2, color = "black") +
+  scale_fill_manual(values = paletteLULC,
+                    labels = LabelsLULC,
+                    breaks = LabelsLULC,
+                    name = "LU/LC")
 ####################################################################################
 
 
 # Biotype
-####################################################################################
-# Biotope <- get_fisbroker_map(url = "https://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_fb_berlinbtk")
-# plot(Biotope)
-# unique(Biotope$PRJ_TITEL)
-# Biotope[20]
-# 
-# plot(Biotope["PRJ_TITEL"])
-# 
-# # subset some forest types to make it plot faster
-# Forest_biotope <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('forst', BT_NAME, fixed = TRUE))$BT_NAME), ]
-# plot(Forest_biotope["BT_NAME"])
-#
-# Pine <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Kiefern', BT_NAME, fixed = TRUE))$BT_NAME), ]
-# Beech <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Buche', BT_NAME, fixed = TRUE))$BT_NAME), ]
-# Oak <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Eiche', BT_NAME, fixed = TRUE))$BT_NAME), ]
-# 
-# Pine <- st_collection_extract(Pine)
-# Oak <- st_collection_extract(Oak)
-# Beech <- st_collection_extract(Beech)
-####################################################################################
+###################################################################################
+Biotope <- get_fisbroker_map(url = "https://fbinter.stadt-berlin.de/fb/wfs/data/senstadt/s_fb_berlinbtk")
+
+# subset some forest types to make it plot faster
+Forest_biotope <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('forst', BT_NAME, fixed = TRUE))$BT_NAME), ]
+plot(Forest_biotope["BT_NAME"])
+
+Pine <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Kiefern', BT_NAME, fixed = TRUE))$BT_NAME), ]
+Beech <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Buche', BT_NAME, fixed = TRUE))$BT_NAME), ]
+Oak <- Biotope[Biotope$BT_NAME %in% unique(filter(Biotope, grepl('Eiche', BT_NAME, fixed = TRUE))$BT_NAME), ]
+
+Pine <- st_collection_extract(Pine)
+Oak <- st_collection_extract(Oak)
+Beech <- st_collection_extract(Beech)
+###################################################################################
 

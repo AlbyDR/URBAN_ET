@@ -1,15 +1,10 @@
 library(tidyverse)
 library(lubridate)
-library(REddyProc)
-library(bigleaf)
 library(summarytools)
 library(sf)
 library(raster)
 library(exactextractr)
 library(ggplot2)
-library(ggspatial)
-library(geobuffer)
-library(rgeos)
 library(RColorBrewer)
 
 ########################################################################

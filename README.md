@@ -6,7 +6,6 @@ This page aims to share R codes to model urban ET using the Soil-Canopy-Observat
 
 ### **The codes are divided into:**
 
-
 **1- Model inputs collection and preprocessing (R)**
 
       1.1 Meteorological station data (DWD - German Climate Data Center)
@@ -45,3 +44,9 @@ This page aims to share R codes to model urban ET using the Soil-Canopy-Observat
          3.2 Creating the cooling service indices (Greening, Evapotranspirative and radiative effects)
 
          3.3 Generate nice plots, maps and figures
+         
+#### References
+
+Rocha, A. D., Vulova, S., Meier, F., Förster, M., & Kleinschmit, B. (2022). Mapping evapotranspirative and radiative cooling services in an urban environment. SSRN Electronic Journal, 85. https://doi.org/10.2139/ssrn.4089553.
+
+Duarte Rocha, A., Vulova, S., van der Tol, C., Förster, M., and Kleinschmit, B.: Modelling hourly evapotranspiration in urban environments with SCOPE using open remote sensing and meteorological data, Hydrol. Earth Syst. Sci., 26, 1111–1129, https://doi.org/10.5194/hess-26-1111-2022, 2022.

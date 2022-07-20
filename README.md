@@ -59,8 +59,8 @@ Duarte Rocha, A. (2022). Berlin Evapotranspiration and Cooling Services. https:/
 The flowchart shows the two-stage modelling processing to derive urban ET and greening cooling service index from open-access data inputs.
 
 <p>
-<img src="https://user-images.githubusercontent.com/40297927/179981190-b0a6445c-e067-40cd-8e4c-78d7d809bad7.png" width=70% height=70%>                 
-<em>*Fig. Flowchart of the two-stage modelling approach to derive urban ET from open-access data inputs.*</em>
+<img src="https://user-images.githubusercontent.com/40297927/179981190-b0a6445c-e067-40cd-8e4c-78d7d809bad7.png" width=70% height=70%>                
+<em>*                               Fig. Flowchart of the two-stage modelling approach to derive urban ET from open-access data inputs.*</em>
 </p>
 
 ### Output products:

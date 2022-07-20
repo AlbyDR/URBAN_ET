@@ -66,12 +66,10 @@ The flowchart shows the two-stage modelling processing to derive urban ET and gr
 
   - Urban ET [mm] for different aggregation periods (from hourly to annual) that can be divided by soil and canopy.
 
-<img src="https://user-images.githubusercontent.com/40297927/179995862-a31b8c07-e85e-4b4f-853c-35d06788b16e.png" width=80% height=80%>
-* Fig. Map of annual ET for Berlin in 2020 (a), zoom-in for the surroundings of the two EC towers, the built-up area TUCC (b) and the residential area ROTH (c), and an urban forest close to residential areas. The distribution of daily modelled ET in the year 2020 at the three locations (e), the red line (built-up area), the black (residential area) and the green (urban forest). The daily ET values from the two towers were extracted (average) using footprints, while the forest values were extracted for the specific forest polygon. Water bodies are not considered in the model and are represented in white.*
+<img src="https://user-images.githubusercontent.com/40297927/179995862-a31b8c07-e85e-4b4f-853c-35d06788b16e.png" width=80% height=80%> *Fig. Map of annual ET for Berlin in 2020 (a), zoom-in for the surroundings of the two EC towers, the built-up area TUCC (b) and the residential area ROTH (c), and an urban forest close to residential areas. The distribution of daily modelled ET in the year 2020 at the three locations (e), the red line (built-up area), the black (residential area) and the green (urban forest). The daily ET values from the two towers were extracted (average) using footprints, while the forest values were extracted for the specific forest polygon. Water bodies are not considered in the model and are represented in white.*
 
   - Greening cooling service index (GCoS) and two sub-indices: Evapotranspirative Cooling Service (ECoS) and Radiative Cooling Service (RCoS).
 
-| <img src="https://user-images.githubusercontent.com/40297927/179998177-d884881d-7e04-4420-bc66-aa5e3dd819f8.png" width=80% height=80% /> |
-| *Fig. Greening cooling service index for the hottest day in 2020 (8th of August) - Berlin (a). The two sub-indices: Evapotranspirative Cooling Service (b) and Radiative Cooling Service. GCoS for six locations (1 km2) for which different surface characteristics (see below LC/LU – Copernicus, Urban Atlas - 2018).* |
+<img src="https://user-images.githubusercontent.com/40297927/179998177-d884881d-7e04-4420-bc66-aa5e3dd819f8.png" width=80% height=80% /> *Fig. Greening cooling service index for the hottest day in 2020 (8th of August) - Berlin (a). The two sub-indices: Evapotranspirative Cooling Service (b) and Radiative Cooling Service. GCoS for six locations (1 km2) for which different surface characteristics (see below LC/LU – Copernicus, Urban Atlas - 2018).*
 
 

@@ -22,132 +22,138 @@ Berlin2020_pred %>%
   descr(stats = c("mean", "min", "max"), 
         transpose = T, headings = F, Data.frame=T)
 
-# annual ET per pixel (no correction)
-Berlin2020_pred %>%
-  mutate_if(is.numeric, pmax, 0) %>%
-  group_by(id_pixel) %>%
-  summarise(ET = sum(ET)) -> ET_2020_noNA
+#Berlin2020_pred <- data.table::fread("Berlin2020_pred.csv")[,-1]
 
-summary(ET_2020_noNA)
+# map annual urban ET (with urban correction)
+Urban_ET_map <- map_urbanET(dataset = Berlin2020_pred,
+                            input_raster = krg_grid, 
+                            NA_cells = cellNA,  
+                            Input_vector = Green_vol,
+                            veg_fraction = "vegproz",
+                            function_var = sum,
+                            function_time = data.table::year,
+                            output_vars = c("ET", "ET_soil", "ET_canopy"),
+                            period_var = "annual",
+                            extract_fun = 'max')
 
-# Heat flux in the hottest day of 2020
-Berlin2020_pred %>%
-  mutate(date = date(timestamp)) %>%
-  filter(date =="2020-08-08") %>%
-  group_by(id_pixel) %>%
-  summarise(ETsum = sum(ET), ET_soilsum = sum(ET_soil), ET_canopysum = sum(ET_canopy),
-            Tsavemax = max(Tsave), Tcavemax = max(Tcave),
-            Tsavemean = mean(Tsave), Tcavemean = mean(Tcave)) %>%
-  select(id_pixel, Tsavemax, Tcavemax, Tsavemean, Tcavemean,
-         ETsum, ET_soilsum, ET_canopysum) -> Hottest_2020_noNA
-
-summary(Hottest_2020_noNA)
-
-# Urban correction and mapping
-# create a dataframe with all pixels of the Berlin extent (even the NAs)
-ET2020_df <- data.frame("ET_annual" = cellNA, # cellNA was created in 2.1 model inputs
-                        "ET_hottest" = cellNA,
-                        "Temp_soil_max" = cellNA,
-                        "Temp_canopy_max" = cellNA)
-
-# fill the non-NA predictions
-ET2020_df$ET_annual[!is.na(ET2020_df$ET_annual)] <- ET_2020_noNA$ET
-ET2020_df$ET_hottest[!is.na(ET2020_df$ET_hottest)] <- Hottest_2020_noNA$ETsum
-ET2020_df$Temp_soil_max[!is.na(ET2020_df$Temp_soil_max)] <- Hottest_2020_noNA$Tsavemax
-ET2020_df$Temp_canopy_max[!is.na(ET2020_df$Temp_canopy_max)] <- Hottest_2020_noNA$Tcavemax
-
-summary(ET2020_df)
-
-# convert the df into a raster
-ET_raster <- krg_grid
-ET_raster$ET_annual <- ET2020_df$ET_annual
-ET_raster$ET_hottest <- ET2020_df$ET_hottest
-ET_raster$Temp_soil_max <- ET2020_df$Temp_soil_max
-ET_raster$Temp_canopy_max <- ET2020_df$Temp_canopy_max
-
-summary(ET_raster[[]])
-plot(ET_raster[[-1]])
-
-# Extract the raster information into a vector map
-plot(Green_vol["vegproz"]) # see 1.4
-
-# extract the values of the raster with the SCOPE model outputs into a vector map (polygon) 
-ET_vector <- exactextractr::exact_extract(ET_raster, Green_vol, 'max') # 'mean'
-head(ET_vector)
-
-# include the values into a vector map
-ET_vector2020  <- Green_vol[2:3] # only the geometry of multipolygon object
-# include Annual_ET values
-ET_vector2020$ET_annual <- ET_vector$max.ET_annual
-# correct the annual ET based on the vegetation fraction
-ET_vector2020$Urban_ET_annual <- (ET_vector2020$ET_annual * (ET_vector2020$vegproz)/100)
-# include daily ET (hottest day)
-ET_vector2020$ET_hottest <- ET_vector$max.ET_hottest
-# correct the daily ET (hottest day) based on the vegetation fraction
-ET_vector2020$Urban_ET_hottest<- (ET_vector2020$ET_hottest * (ET_vector2020$vegproz)/100)
-
-plot(ET_vector2020["ET_hottest"], border="transparent")
-plot(ET_vector2020["Urban_ET_hottest"], border="transparent")
-
-# include the max soil and canopy temperature in the hottest day
-ET_vector2020$Ts_hottest <- ET_vector$max.Temp_soil_max
-ET_vector2020$Tc_hottest <- ET_vector$max.Temp_canopy_max
-
-# create an index for the soil temperature under vegetation in the hottest day (radiation cooling effect)
-ET_vector2020$Ts_hottest_idx <- scales::rescale(1-(
-  (ET_vector2020$Ts_hottest - min(ET_vector2020$Ts_hottest,na.rm=T))/
-    (max(ET_vector2020$Ts_hottest,na.rm=T)-min(ET_vector2020$Ts_hottest,na.rm=T))), 
-  to = c(0,1))
-
-# correct the radiation cooling index (RCoS) to urban environment using vegetation fraction
-ET_vector2020$Rcos20 <- (ET_vector2020$Ts_hottest_idx * (ET_vector2020$vegproz)/100)
-summary(ET_vector2020$Rcos20)
-
-# create the Evapotranspirative cooling index (ECoS) based on the hottest day
-ET_vector2020$Ecos20 <- scales::rescale(
-  (ET_vector2020$Urban_ET_hottest - min(ET_vector2020$Urban_ET_hottest, na.rm=T))/
-(max(ET_vector2020$Urban_ET_hottest,na.rm=T) - min(ET_vector2020$Urban_ET_hottest,na.rm=T))
-  , to = c(0,1))
-summary(ET_vector2020$Ecos20)
-
-# calculate the greening cooling index as the average of RCoS and ECoS
-ET_vector2020$Gcos20 <- ((ET_vector2020$Rcos20 + ET_vector2020$Ecos20)/2)
-
-# extract LAI in the hottest day 2020
-LAI_Berlin_hottest <- raster(LAI_Berlin$date_2020.08.08_12)
-LAI_Berlin_hottest$hottest2020 <- raster::values(LAI_Berlin$date_2020.08.08_12)
-
-LAI_vector <- exactextractr::exact_extract(LAI_Berlin_hottest, 
-                                           Green_vol, 'max')
-summary(LAI_vector)
-
-names(ET_vector2020)
-
-# create the final map object with all important variables
-Cooling_Maps <- ET_vector2020[3]
-Cooling_Maps$Annual_URBAN_ET_2020 <- ET_vector2020$Urban_ET_annual
-Cooling_Maps$ET_hottest_day_2020 <- ET_vector2020$Urban_ET_hottest
-Cooling_Maps$ECoS_2020 <- ET_vector2020$Ecos20
-Cooling_Maps$RCoS_2020 <- ET_vector2020$Rcos20
-Cooling_Maps$GCoS_2020 <- ET_vector2020$Gcos20
-Cooling_Maps$Vegetation_Height <- ET_vector2020$veghoe
-Cooling_Maps$Vegetation_Fraction <- ET_vector2020$vegproz
-Cooling_Maps$LAI_hottest_day_2020 <- LAI_vector
-
-plot(Cooling_Maps[c(2,3)], border = "transparent", nbreaks=11, 
+plot(Urban_ET_map_func, border = "transparent", nbreaks=11, 
      pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
 
-plot(Cooling_Maps[c(4,5,6)], border = "transparent", nbreaks=11, 
+# map urban ET in the hottest day (with urban correction)
+Urban_ET_map_hotday <- map_urbanET(dataset = Berlin2020_pred[data.table::as.IDate(timestamp) == "2020-08-08",], # hottest day subset
+                                   input_raster = krg_grid, 
+                                   NA_cells = cellNA,  
+                                   Input_vector = Green_vol,
+                                   veg_fraction = "vegproz",
+                                   function_var = sum,
+                                   function_time = data.table::yday,
+                                   output_vars = c("ET"),
+                                   period_var = "hottest_day",
+                                   extract_fun = 'max')
+
+plot(Urban_ET_map_hotday, border = "transparent", nbreaks=11, 
      pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
 
-plot(Cooling_Maps[c(7,8,9)], border = "transparent", nbreaks=7, 
-     pal=(RColorBrewer::brewer.pal(7,"Greens")), reset=FALSE)
+# map 24 hours urban ET in a specific day (with urban correction)
+Urban_ET_map_24hour <- map_urbanET(dataset = Berlin2020_pred[data.table::as.IDate(timestamp) == "2020-08-08",], # hottest day subset
+                                   input_raster = krg_grid, 
+                                   NA_cells = cellNA,  
+                                   Input_vector = Green_vol,
+                                   veg_fraction = "vegproz",
+                                   function_var = sum,
+                                   function_time = data.table::hour,
+                                   output_vars = c("ET"),
+                                   period_var = "hottest_day",
+                                   extract_fun = 'max')
 
-plot(Berlin_border_utm4[c(1,2,3,4,5)])
+plot(Urban_ET_map_24hour[c(3,25,49)], border = "transparent", nbreaks=11, 
+     pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
 
-class(Cooling_Maps)
-sf::st_crs(Cooling_Maps) <- 
+summary(Urban_ET_map_24hour[seq(3,49,2)])
 
+# animate map of hourly urban ET
+
+# create a pallet for ET
+ETcolor = rev(c(rep("#4575b4",1),rep("#74add1",1),rep("#abd9e9",1), rep("#e0f3f8",1),
+                rep("#ffffbf",1),rep("#fee090",1),rep("#fdae61",1),rep("#f46d43",1), 
+                rep("#d73027",1),  rep("#d73027",1), rep("#a50026",1), rep("#a50026",1)))
+
+create_GIF(
+  map =  Urban_ET_map_24hour,
+  period = "24hours",
+  gif_subtitle = "Urban ET [mm/hour] - Berlin 08-08-2020",
+  water_mask = water_polygons,
+  border = Berlin_border_utm,
+  limits_scale = c(0, 0.60),
+  breaks_scale = seq(0, 0.60, 0.05),
+  colors_pallete = ETcolor,
+  time_interval = 0.8,
+  loops = 1,
+  movie_name = "Urban_ET_24h_08_08_2020.gif")
+
+# map monthly urban ET (with urban correction)
+Urban_ET_map_month <- map_urbanET(input_raster = krg_grid,
+                                  NA_cells = cellNA,  
+                                  Input_vector = Green_vol,
+                                  veg_fraction = "vegproz",
+                                  dataset = Berlin2020_pred,
+                                  function_var = sum,
+                                  function_time = data.table::month,
+                                  output_vars = c("ET"),
+                                  period_var = "monthly",
+                                  extract_fun = 'max')
+
+plot(Urban_ET_map_month[c(3,9,17,21)], border = "transparent", nbreaks=11, 
+     pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
+
+# animate map of monthly urban ET
+create_GIF(
+  map =  Urban_ET_map_month,
+  period = "month",
+  gif_subtitle = "Urban ET [mm/month] - Berlin 2020",
+  water_mask = water_polygons,
+  border = Berlin_border_utm,
+  limits_scale = c(0, 100),
+  breaks_scale = seq(0, 100, 20),
+  colors_pallete = ETcolor,
+  time_interval = 0.8,
+  loops = 1,
+  movie_name = "Urban_ET_2020.gif")
+
+# map urban ET per season (with urban correction)
+Urban_ET_map_quarter <- map_urbanET(dataset = Berlin2020_pred, # data.table with datetime, id_pixel and SCOPE outputs
+                                    input_raster = krg_grid, # raster used to interpolate and modelling
+                                    NA_cells = cellNA, # vector with the NA cells mask by the city (Berlin) border  
+                                    Input_vector = Green_vol, # vector map (sf) with the vegetation fraction
+                                    veg_fraction = "vegproz", # name of the vegetation fraction var in the map (sf)
+                                    function_var = sum, # function to summarize (sum, mean, max, min)
+                                    function_time = quarter, # time to summarize (year, quarter, month, week, yday, hour). If hour or day maybe is need to reduce the range of the timestamp before run
+                                    output_vars = c("ET", "ET_canopy"), # possible outputs (ET, ET_soil, Tsave - see names(Berlin2020_pred)). If many, better year, quarter or up tp month
+                                    period_var = "quarter", # name to enumerate the period
+                                    extract_fun = 'max') # function to extract the raster values into the vector. If the raster is high-resolution use "mean",  otherwise "max" (e.g. 1km grid) 
+
+plot(Urban_ET_map_quarter[c(3,7,11,15)], border = "transparent", nbreaks=11, 
+     pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
+
+#########################################################################
+# map urban Cooling Services
+Cooling_maps_2000 <- map_urban_cooling(dataset = Berlin2020_pred,
+                                       date_hottest = "2020-08-08",
+                                       input_raster = krg_grid, 
+                                       NA_cells = cellNA,  
+                                       Input_vector = Green_vol,
+                                       veg_fraction = "vegproz",
+                                       output_vars = c("ET", "Tsave"),
+                                       extract_fun = 'max')
+
+summary(Cooling_maps_2000)
+
+plot(Cooling_maps_2000[c(3,4,5)], border = "transparent", nbreaks=11, 
+     pal=RColorBrewer::brewer.pal('RdYlBu', n = 11), reset=FALSE)
+
+
+#########################################################################
+#########################################################################
 write_sf(Cooling_Maps, "D:/Research_topics/UWI/Data_UWI/Cooling_Maps.gpkg")
 Cooling_Maps <- read_sf("Cooling_Maps.gpkg")
 

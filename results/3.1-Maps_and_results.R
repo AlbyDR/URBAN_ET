@@ -48,6 +48,40 @@ ggplot(Cooling_Maps) +
         panel.grid.major = element_blank(), 
         panel.background = element_rect("white"))
 
+# create a pallet for ET
+ETcolor = rev(c(rep("#4575b4",1),rep("#74add1",1),rep("#abd9e9",1), rep("#e0f3f8",1),
+            rep("#ffffbf",1),rep("#fee090",1),rep("#fdae61",1),rep("#f46d43",1), 
+            rep("#d73027",1),  rep("#d73027",1), rep("#a50026",1), rep("#a50026",1)))
+
+# EC tower TUCC map zoom
+ggplot(Cooling_Maps) +
+  geom_sf(aes(fill = Annual_URBAN_ET_2020), colour = NA) + 
+  geom_sf(data = water_polygons, fill = "white", size = 0, color = "transparent") +
+  scale_fill_gradientn(breaks = seq(0, 600, 50),limits = c(0,600),
+                       colors = ETcolor, 
+                       name = "ET", na.value = NA,
+                       guide = guide_colorbar(direction = "horizontal",
+                                              label.position = "bottom",
+                                              title.vjust = 9, label.vjust = 9,
+                                              frame.colour = "black",
+                                              frame.linewidth = 0.5,
+                                              frame.linetype = 1,
+                                              title.position = "left",
+                                              barwidth = 25, barheight = 1.2, nbin = 30,
+                                              label.theme = element_text(angle = 0, size = 14))) +
+  coord_sf(xlim = c(385525.6,387524.6), ylim = c(5818333,5820331), expand = FALSE) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="bottom",
+        legend.spacing.y = unit(1.5, "lines"),
+        legend.box.spacing = unit(-0.5, "lines"),
+        panel.grid.major = element_blank(), 
+        panel.background = element_rect("white"))
+
 # areas with Vegetation_Fraction = 0 or NA
 Cooling_Maps %>%
   filter(Vegetation_Fraction == 0 | is.na(Vegetation_Fraction)) %>%
@@ -139,6 +173,7 @@ buffer_points <- geobuffer::geobuffer_pts(points_map_lat, dist_m = 1000,
                                            output = "sp")
 plot(buffer_points)
 
+# map with Topmap in the background
 mapview_TopMap <-
   mapview(Cooling_Maps, zcol="GCoS_2020",legend = FALSE, layer.name = "ETcos_2019", 
           col.regions = RColorBrewer::brewer.pal('RdYlBu', n = 7), 
@@ -148,6 +183,7 @@ mapview_TopMap <-
   mapview(points_map_utm, legend = FALSE, col.regions = "black", lwd = 3) +
   mapview(buffer_points, legend = FALSE, color = "black", alpha = 1, alpha.regions = 0, lwd = 1.4) 
 
+# zoom the map for each selected point
 mapview_TopMap@map %>% leaflet::setView(lng = points_map_lat@coords[1,1][[1]], 
                                         lat = points_map_lat@coords[1,2][[1]], zoom = 14) #-> mapview_zoom_EC_tower_TUCC
 mapview_TopMap@map %>% leaflet::setView(lng = points_map_lat@coords[2,1][[1]], 
@@ -161,8 +197,19 @@ mapview_TopMap@map %>% leaflet::setView(lng = points_map_lat@coords[5,1][[1]],
 mapview_TopMap@map %>% leaflet::setView(lng = points_map_lat@coords[6,1][[1]], 
                                         lat = points_map_lat@coords[6,2][[1]], zoom = 14) #-> mapview_zoom_ForestII
 mapview_TopMap@map %>% leaflet::setView(lng = points_map_lat@coords[7,1][[1]], 
-                                        lat = points_map_lat@coords[7,2][[1]], zoom = 14) #-> mapview_zoom_ForestIII
+                                        lat = points_map_lat@coords[7,2][[1]], zoom = 14.5) -> mapview_zoom_ForestIII
 
+mapviewOptions(fgb = FALSE)
+
+mapshot(x = mapview_zoom_ForestIII,
+        remove_url = TRUE,
+        vwidth = 1000, 
+        vheight = 1000,
+        file = paste0(getwd(),"/mapview_zoom_ForestIII.png"),
+        remove_controls =c("zoomControl", "scaleBar", "layersControl", 
+                           "homeButton", "drawToolbar", "easyButton"))
+
+# find areas according some criteria
 Cooling_Maps %>%
   filter(Annual_URBAN_ET_2020 >= 550 & Vegetation_Fraction >= 95) %>%
   mapview(zcol = "ECoS_2020", alpha.regions = 0.5, 
@@ -171,6 +218,7 @@ Cooling_Maps %>%
           map.types = "Esri.WorldImagery", color = "white", lwd = 1.2)+
   mapview(berlin.sf, legend = FALSE, color = "black", alpha = 1, alpha.regions = 0, lwd = 1.4)
 
+# find coordinates according some criteria
 Cooling_Maps %>%
   filter(Annual_URBAN_ET_2020 >= 575 & 
          Vegetation_Fraction >= 98 & 
@@ -192,4 +240,155 @@ st_intersects(Pine, Cooling_Maps)
 mean(Cooling_Maps[c(3654,3655, 3656, 3657, 3658, 3663, 3664, 3697, 3698, 3699, 
                     3701, 3704,3714,  3723, 3727, 3737, 3750, 3755, 3758,
                     27433),]$Annual_URBAN_ET_2020)
+
+
+# Average model outputs per pixel (non-corrected)
+Berlin2020_pred %>%
+  filter(id_pixel %in% c(161, 441, 1217, 930, 1169, 882)) %>%
+  select(where(is.numeric)) %>%
+  #select(Htot, Actot, Tcave, Tsave, Gtot, id_pixel) %>%
+  group_by(id_pixel) %>%
+  summarytools::descr(stats = c("mean", "min", "max"), 
+        transpose = T, headings = F, Data.frame=T)
+# Tsave ºC ‘average’ soil temperature
+# Tcave ºC ‘average’ canopy temperature
+# Actot umol m-2 s-1 net photosynthesis of canopy
+
+# Average of model inputs per month for some selected pixels
+Inputs_Berlin %>%
+  filter(id_pixel %in% c(882, 1169)) %>%
+  # select(where(is.numeric)) %>%
+  mutate(month = month(REddyProc::BerkeleyJulianDateToPOSIXct(t))) %>%
+  select(LAI, Ta, RH, Rin, id_pixel, month) %>%
+  group_by(id_pixel, month) %>%
+  summarytools::descr(stats = c("mean", "min", "max"), 
+        transpose = T, headings = F, Data.frame=T)
+
+# Average final results per pixels
+ET_vector2020 %>%
+  filter(id_pixel %in% c(161, 1217, 930, 1169, 882)) %>%
+  # select(where(is.numeric)) %>%
+  select(ET_annual, Urban_ET_annual, ET_hottest, Urban_ET_hottest,
+         Ts_hottest, Tc_hottest, Ts_hottest_idx, Rcos20, Ecos20,
+         Gcos20, id_pixel) %>%
+  group_by(id_pixel) %>%
+  summarytools::descr(stats = c("mean", "min", "max"), 
+      transpose = T, headings = F, Data.frame=T)
+
+# Average final results per polygon
+ET_vector2020 %>%
+  filter(id_polygon %in% c(2919, 3564, 4678, 9217, 10589, 19212, 20559, 21192)) %>% 
+  select(ET_annual, Urban_ET_annual, ET_hottest, Urban_ET_hottest,
+         Ts_hottest, Tc_hottest, Ts_hottest_idx, Rcos20, Ecos20,
+         Gcos20, id_polygon) %>%
+  group_by(id_polygon) %>%
+  summarytools::descr(stats = c("mean", "min", "max"), 
+        transpose = T, headings = F, Data.frame=T)
+
+# sumary per hour
+as_tibble(data.frame("timestamp" = REddyProc::BerkeleyJulianDateToPOSIXct(t)[8761:17544], 
+                     "Build-up_area" = FP_Berlin2020$ROTH_ETpixel_VFbyFP,
+                     "TUCC" = FP_Berlin2020$TUCC_ETpixel_VFbyFP,
+                     "Forest" = filter(Berlin2020_pred, id_pixel == 1278)$ET)) %>% 
+  group_by(year=year(timestamp),
+           month=month(timestamp, label = TRUE), 
+           date=date(timestamp)) %>%
+  mutate_if(is.numeric, pmax, 0) %>%
+  summarise(ROTH_daily = sum(ROTH, na.rm = TRUE),
+            TUCC_daily = sum(TUCC, na.rm = TRUE),
+            Forest_daily = sum(Forest, na.rm = TRUE),
+            .groups='drop') -> ET_dailymean_2020
+
+summary(ET_dailymean_2020)
+
+
+# plot by hour and month
+ggplot(ET_dailymean_2020, aes(x = date)) +
+  geom_line(aes(y = TUCC_daily, colour = "1.TUCC"), size = 1) +
+  geom_line(aes(y = ROTH_daily, colour = "2.ROTH"), size = 1) +
+  geom_line(aes(y = Forest_daily, colour= "3.Forest"), size = 1) +
+  scale_y_continuous(limits=c(0,5), 
+                     breaks=c(0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5),
+                     expand = c(0.0, 0.0)) +
+  # coord_x_date(xlim = c("2019-01-01", "2020-12-31"), expand = F, #
+  #              ylim = c(-0.035, 0.035)) +
+  #scale_x_date(name = NULL, labels = NULL, breaks = NULL) +
+  scale_x_date(date_labels = "%b",date_breaks = "month", breaks = pretty_breaks(), expand = c(0, 0)) + # %y
+  labs(x=" Month (2020)", y='ET [mm/day]') +
+  scale_color_manual(name = "Site:", 
+                     values = c("1.TUCC" = "red", 
+                                "2.ROTH" = "black" ,               
+                                "3.Forest" = "#008C00")) +
+  guides(color = guide_legend(override.aes = list(size = 3, fill = "transparent"))) + 
+  #ggtitle("d) TUCC site: corrected predicted and observed ET") +
+  theme(legend.position = c(0.80, 0.95),
+        legend.direction = "horizontal",
+        legend.background = element_rect("transparent"),
+        legend.key = element_rect("transparent"),
+        legend.text =  element_text(color="black", size = 12),
+        legend.title = element_text(colour="black", size = 12, face="bold"),
+        axis.text.y = element_text(color="grey25", hjust=.9, size = 12),
+        axis.title.y = element_text(color = "grey25", face="bold", size = 12, vjust = 1.2),
+        axis.text.x = element_text(color="grey25", hjust = -1.0, size = 12),
+        axis.title.x = element_text(color = "grey25", face = "bold", size = 12, vjust = 1.2),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        panel.spacing.y = unit(0, "lines"), 
+        panel.spacing.x = unit(0, "lines"), 
+        panel.background = element_rect(fill = "white", colour = "lightgrey", size = 0.5, linetype = "solid"),
+        panel.grid.major = element_line(size = 0.25, linetype = 'dotted', colour = "lightgrey"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'dotted', colour = "white"),
+        plot.title = element_text(size=9, vjust=-1,hjust=0))
+
+summary(EC_DWD_ROTH$prec_mm[1:17544])
+summary(EC_DWD_TUCC$prec_mm[1:17544])
+
+as_tibble(data.frame("timestamp" = ymd_hms(EC_DWD_TUCC$timestamp)[1:17544],
+                     "dry_TUCC" = rain_cond_vec_TUCC[1:17544],
+                     "Precmm_TUCC" = EC_DWD_TUCC$prec_mm[1:17544],
+                     "dry_ROTH" = rain_cond_vec[1:17544],
+                     "Precmm_ROTH" = EC_DWD_ROTH$prec_mm[1:17544],
+                     "TUCC_obs" = EC_DWD_TUCC$ET_clean[1:17544], 
+                     "TUCC_modeled" = c(Berlin2019_TUCC$ET_cVF,Berlin2020_TUCC$ET_cVF),
+                     "ROTH_obs" = EC_DWD_ROTH$ET_clean[1:17544], 
+                     "ROTH_modeled" = c(Berlin2019_ROTH$ET_cVF,Berlin2020_ROTH$ET_cVF)
+)) %>% 
+  ggplot() +
+  geom_smooth(formula = y~splines::bs(x, 24), aes(x = date(timestamp), y = (Precmm_TUCC-0.04838)/5, color="Prec_TUCC", fill="Prec_TUCC")) +
+  geom_smooth(formula = y~splines::bs(x, 24), aes(x = date(timestamp), y = (Precmm_ROTH-0.05078)/5, color="Prec_ROTH", fill="Prec_ROTH")) +
+  stat_smooth(formula = y~splines::bs(x, 24), aes(x = date(timestamp), y = ROTH_obs-ROTH_modeled, color = "Error_ROTH", fill = "Error_ROTH")) +
+  stat_smooth(formula = y~splines::bs(x, 24), aes(x = date(timestamp), y = TUCC_obs-TUCC_modeled, color = "Error_TUCC", fill = "Error_TUCC")) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dotted") +
+  scale_y_continuous(breaks=c(-0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03), 
+                     sec.axis = sec_axis(~ . * 5 + 0.05078, 
+                                         breaks=c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3), name = "Precipitation [mm/h]")) +
+  coord_x_date(xlim = c("2019-01-01", "2020-12-31"), expand = F, #
+               ylim = c(-0.035, 0.035)) +
+  scale_color_manual(name=NULL, #labels=NULL, breaks=NULL,
+                     values = c("Prec_TUCC"="darkgrey", 
+                                "Prec_ROTH" = "grey",
+                                "Error_ROTH" = "blue",
+                                "Error_TUCC" = "red"),        
+                     aesthetics = c("color", "fill")) +
+  scale_x_date(date_labels = "%b",date_breaks = "month", breaks = pretty_breaks(), 
+               expand = c(0, 0)) + # %y
+  labs(x = "Month (2019/2020)", y = 'Model error [mm/h]') +
+  theme(legend.position = c(0.7, 0.10),
+        legend.direction = "horizontal",
+        legend.background = element_rect("transparent"),
+        legend.key = element_rect("transparent"),
+        legend.text =  element_text(color = "black", size = 12),
+        axis.text.y = element_text(color = "grey25", hjust = .9, size = 12),
+        axis.title.y = element_text(color = "grey25", face = "bold", size = 13, vjust = 1.2),
+        axis.text.x = element_text(color = "grey25", hjust = -0, size = 13),
+        axis.title.x = element_text(color = "grey25", face = "bold", size = 13, vjust = 1.2),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        panel.spacing.y = unit(0.5, "lines"), 
+        panel.spacing.x = unit(0.5, "lines"), 
+        panel.background = element_rect(fill = "grey90"),  
+        panel.border = element_blank(), 
+        panel.grid.major = element_line(colour = "grey90"),
+        panel.grid.minor = element_line(colour = "grey90"),
+        plot.title = element_text(size = 14, vjust = -1, hjust = 0, face = "bold"))
 
